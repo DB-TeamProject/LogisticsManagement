@@ -103,16 +103,16 @@ static struct sqlexd {
    unsigned int   sqcmod;
    unsigned int   sqfmod;
    unsigned int   sqlpfmem;
-            void  *sqhstv[2];
-   unsigned int   sqhstl[2];
-            int   sqhsts[2];
-            void  *sqindv[2];
-            int   sqinds[2];
-   unsigned int   sqharm[2];
-   unsigned int   *sqharc[2];
-   unsigned short  sqadto[2];
-   unsigned short  sqtdso[2];
-} sqlstm = {13,2};
+            void  *sqhstv[3];
+   unsigned int   sqhstl[3];
+            int   sqhsts[3];
+            void  *sqindv[3];
+            int   sqinds[3];
+   unsigned int   sqharm[3];
+   unsigned int   *sqharc[3];
+   unsigned short  sqadto[3];
+   unsigned short  sqtdso[3];
+} sqlstm = {13,3};
 
 /* SQLLIB Prototypes */
 extern void sqlcxt (void **, unsigned int *,
@@ -136,11 +136,11 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 static const short sqlcud0[] =
 {13,4130,1,0,0,
 5,0,0,1,0,0,30,46,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,92,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,98,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,104,0,0,2,0,0,1,0,2,9,0,0,2,9,0,0,
-77,0,0,2,0,0,15,122,0,0,0,0,0,1,0,
-92,0,0,3,0,0,29,123,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,93,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,99,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,104,0,0,3,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,
+81,0,0,2,0,0,15,120,0,0,0,0,0,1,0,
+96,0,0,3,0,0,29,121,0,0,0,0,0,1,0,
 };
 
 
@@ -230,9 +230,12 @@ void select_login()
 			gotoxy(35, 13);
 			printf("아이디 또는 비밀번호가 틀렸습니다.");
 		}
-
+		count = 1;
 
 		/* EXEC SQL BEGIN DECLARE SECTION; */ 
+
+		/* varchar officenumber[100]; */ 
+struct { unsigned short len; unsigned char arr[100]; } officenumber;
 
 		/* varchar id[100]; */ 
 struct { unsigned short len; unsigned char arr[100]; } id;
@@ -262,7 +265,7 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 
 
 		/* 실행시킬 SQL 문장*/
-		sprintf(dynstmt, "SELECT id, pw FROM account where id = '%s' and pw = '%s'  ",
+		sprintf(dynstmt, "SELECT officenumber, id, pw FROM account where id = '%s' and pw = '%s'  ",
 			no_temp1, no_temp2);
 
 		/* EXEC SQL PREPARE S FROM : dynstmt; */ 
@@ -336,13 +339,12 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 
 
 		for (;;) {
-			count = 1;
-			/* EXEC SQL FETCH c_cursor INTO : id, : pw; */ 
+			/* EXEC SQL FETCH c_cursor INTO : officenumber, : id, : pw; */ 
 
 {
    struct sqlexd sqlstm;
    sqlstm.sqlvsn = 13;
-   sqlstm.arrsiz = 2;
+   sqlstm.arrsiz = 3;
    sqlstm.sqladtp = &sqladt;
    sqlstm.sqltdsp = &sqltds;
    sqlstm.iters = (unsigned int  )1;
@@ -355,7 +357,7 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
    sqlstm.occurs = (unsigned int  )0;
    sqlstm.sqfoff = (           int )0;
    sqlstm.sqfmod = (unsigned int )2;
-   sqlstm.sqhstv[0] = (         void  *)&id;
+   sqlstm.sqhstv[0] = (         void  *)&officenumber;
    sqlstm.sqhstl[0] = (unsigned int  )102;
    sqlstm.sqhsts[0] = (         int  )0;
    sqlstm.sqindv[0] = (         void  *)0;
@@ -363,7 +365,7 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
    sqlstm.sqharm[0] = (unsigned int  )0;
    sqlstm.sqadto[0] = (unsigned short )0;
    sqlstm.sqtdso[0] = (unsigned short )0;
-   sqlstm.sqhstv[1] = (         void  *)&pw;
+   sqlstm.sqhstv[1] = (         void  *)&id;
    sqlstm.sqhstl[1] = (unsigned int  )102;
    sqlstm.sqhsts[1] = (         int  )0;
    sqlstm.sqindv[1] = (         void  *)0;
@@ -371,6 +373,14 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
    sqlstm.sqharm[1] = (unsigned int  )0;
    sqlstm.sqadto[1] = (unsigned short )0;
    sqlstm.sqtdso[1] = (unsigned short )0;
+   sqlstm.sqhstv[2] = (         void  *)&pw;
+   sqlstm.sqhstl[2] = (unsigned int  )102;
+   sqlstm.sqhsts[2] = (         int  )0;
+   sqlstm.sqindv[2] = (         void  *)0;
+   sqlstm.sqinds[2] = (         int  )0;
+   sqlstm.sqharm[2] = (unsigned int  )0;
+   sqlstm.sqadto[2] = (unsigned short )0;
+   sqlstm.sqtdso[2] = (unsigned short )0;
    sqlstm.sqphsv = sqlstm.sqhstv;
    sqlstm.sqphsl = sqlstm.sqhstl;
    sqlstm.sqphss = sqlstm.sqhsts;
@@ -386,33 +396,31 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 }
 
 
-			id.arr[id.len] = '\0';
+			officenumber.arr[officenumber.len] = '\0';
+			pw.arr[pw.len] = '\0';
 			pw.arr[pw.len] = '\0';
 			gotoxy(35, 15);
-			printf("%s", id.arr);
 			if (id.arr != NULL && pw.arr != NULL) { // 데이터베이스에서 값을 찾았을 경우
 				clrscr();
-				if(strcmp(id.arr, "head")==0){ // 본사 계정으로 로그인
+				count=2;
+				if(strcmp(officenumber.arr, "100")==0){ // 본사 계정으로 로그인
 					select_HeadMain();
 				}
 				else{ //지사 계정으로 로그인
 					select_BranchMain();
 				}
-				count = 2; // 로그인에 성공한 경우 반복문 break
 			}
 		}
-
-
 		/* EXEC SQL CLOSE c_cursor; */ 
 
 {
   struct sqlexd sqlstm;
   sqlstm.sqlvsn = 13;
-  sqlstm.arrsiz = 2;
+  sqlstm.arrsiz = 3;
   sqlstm.sqladtp = &sqladt;
   sqlstm.sqltdsp = &sqltds;
   sqlstm.iters = (unsigned int  )1;
-  sqlstm.offset = (unsigned int  )77;
+  sqlstm.offset = (unsigned int  )81;
   sqlstm.cud = sqlcud0;
   sqlstm.sqlest = (unsigned char  *)&sqlca;
   sqlstm.sqlety = (unsigned short)4352;
@@ -427,11 +435,11 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 {
   struct sqlexd sqlstm;
   sqlstm.sqlvsn = 13;
-  sqlstm.arrsiz = 2;
+  sqlstm.arrsiz = 3;
   sqlstm.sqladtp = &sqladt;
   sqlstm.sqltdsp = &sqltds;
   sqlstm.iters = (unsigned int  )1;
-  sqlstm.offset = (unsigned int  )92;
+  sqlstm.offset = (unsigned int  )96;
   sqlstm.cud = sqlcud0;
   sqlstm.sqlest = (unsigned char  *)&sqlca;
   sqlstm.sqlety = (unsigned short)4352;
@@ -446,4 +454,6 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 			break;
 		}
 	}
+
+
 }

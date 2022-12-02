@@ -61,9 +61,10 @@ void select_login()
 			gotoxy(35, 13);
 			printf("아이디 또는 비밀번호가 틀렸습니다.");
 		}
-
+		count = 1;
 
 		EXEC SQL BEGIN DECLARE SECTION;
+		varchar officenumber[100];
 		varchar id[100];
 		varchar pw[100];
 
@@ -86,7 +87,7 @@ void select_login()
 
 
 		/* 실행시킬 SQL 문장*/
-		sprintf(dynstmt, "SELECT id, pw FROM account where id = '%s' and pw = '%s'  ",
+		sprintf(dynstmt, "SELECT officenumber, id, pw FROM account where id = '%s' and pw = '%s'  ",
 			no_temp1, no_temp2);
 
 		EXEC SQL PREPARE S FROM : dynstmt;
@@ -100,25 +101,22 @@ void select_login()
 		EXEC SQL WHENEVER NOT FOUND DO break;
 
 		for (;;) {
-			count = 1;
-			EXEC SQL FETCH c_cursor INTO : id, : pw;
-			id.arr[id.len] = '\0';
+			EXEC SQL FETCH c_cursor INTO : officenumber, : id, : pw;
+			officenumber.arr[officenumber.len] = '\0';
+			pw.arr[pw.len] = '\0';
 			pw.arr[pw.len] = '\0';
 			gotoxy(35, 15);
-			printf("%s", id.arr);
 			if (id.arr != NULL && pw.arr != NULL) { // 데이터베이스에서 값을 찾았을 경우
 				clrscr();
-				if(strcmp(id.arr, "head")==0){ // 본사 계정으로 로그인
+				count=2;
+				if(strcmp(officenumber.arr, "100")==0){ // 본사 계정으로 로그인
 					select_HeadMain();
 				}
 				else{ //지사 계정으로 로그인
 					select_BranchMain();
 				}
-				count = 2; // 로그인에 성공한 경우 반복문 break
 			}
 		}
-
-
 		EXEC SQL CLOSE c_cursor;
 		EXEC SQL COMMIT;
 
@@ -126,4 +124,6 @@ void select_login()
 			break;
 		}
 	}
+
+
 }
