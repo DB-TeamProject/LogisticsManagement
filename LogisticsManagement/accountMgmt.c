@@ -136,11 +136,11 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 static const short sqlcud0[] =
 {13,4130,1,0,0,
 5,0,0,1,0,0,30,46,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,91,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,97,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,103,0,0,2,0,0,1,0,2,9,0,0,2,9,0,0,
-77,0,0,2,0,0,15,114,0,0,0,0,0,1,0,
-92,0,0,3,0,0,29,115,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,92,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,98,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,104,0,0,2,0,0,1,0,2,9,0,0,2,9,0,0,
+77,0,0,2,0,0,15,122,0,0,0,0,0,1,0,
+92,0,0,3,0,0,29,123,0,0,0,0,0,1,0,
 };
 
 
@@ -164,7 +164,8 @@ static const short sqlcud0[] =
 #define getch() _getch()
 //-----------------------------------------
 
-extern void select_main();
+extern void select_HeadMain();
+extern void select_BranchMain();
 
 /*---------------  화면 커서 위치 제어 ----------------------*/
 #include < windows.h >
@@ -192,7 +193,6 @@ struct { unsigned short len; unsigned char arr[20]; } pwd;
 void login()
 {
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
-
 	DB_connect();
 	select_login();
 	/* EXEC SQL COMMIT WORK RELEASE; */ 
@@ -219,6 +219,7 @@ void login()
 
 void select_login()
 {
+	clrscr();
 	int count = 0;
 	while (1) {
 		clrscr();
@@ -387,9 +388,16 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 
 			id.arr[id.len] = '\0';
 			pw.arr[pw.len] = '\0';
+			gotoxy(35, 15);
+			printf("%s", id.arr);
 			if (id.arr != NULL && pw.arr != NULL) { // 데이터베이스에서 값을 찾았을 경우
 				clrscr();
-				select_main(); 
+				if(strcmp(id.arr, "head")==0){ // 본사 계정으로 로그인
+					select_HeadMain();
+				}
+				else{ //지사 계정으로 로그인
+					select_BranchMain();
+				}
 				count = 2; // 로그인에 성공한 경우 반복문 break
 			}
 		}
