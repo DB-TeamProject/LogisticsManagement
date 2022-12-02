@@ -155,9 +155,7 @@ static const short sqlcud0[] =
 #include <conio.h>
 
 /* for oracle */
-#include <sqlda.h>
-#include <sqlca.h>
-#include <sqlcpr.h>
+#include"stdafx.h" // 미리 컴파일된 헤더 파일
 
 
 // win32 Visual C 2010 이상컴파일시 추가
