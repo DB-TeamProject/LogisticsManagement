@@ -158,7 +158,7 @@ static const short sqlcud0[] =
 #include <sqlcpr.h>
 
 extern void login();
-extern void select_product();
+extern void addStorage();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -411,7 +411,7 @@ void select_ProductMain() {
 			if (cursor_position == 10) { //첫번째 행
 			}
 			else if (cursor_position == 12) {//두번째 행
-				select_product();
+				addStorage();
 			}
 			else if (cursor_position == 14) {//세번째 행
 				select_HeadMain();

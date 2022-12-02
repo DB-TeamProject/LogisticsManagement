@@ -21,7 +21,13 @@
     <ClCompile Include="mainMenu.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="addLogistics.c">
+    <ClCompile Include="소스.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="addStorage.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="소스1.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

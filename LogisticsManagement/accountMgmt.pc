@@ -54,7 +54,7 @@ void select_login()
 	int count = 0;
 	while (1) {
 		clrscr();
-		gotoxy(0,1);
+		gotoxy(0, 1);
 		print_screen("login.txt");
 
 		if (count == 1) { // 이전에 아이디 비밀번호가 틀렸을 경우
@@ -99,29 +99,23 @@ void select_login()
 		EXEC SQL OPEN c_cursor;
 
 		EXEC SQL WHENEVER NOT FOUND DO break;
-
+		
 		for (;;) {
 			EXEC SQL FETCH c_cursor INTO : officenumber, : id, : pw;
 			officenumber.arr[officenumber.len] = '\0';
-			pw.arr[pw.len] = '\0';
+			id.arr[id.len] = '\0';
 			pw.arr[pw.len] = '\0';
 			gotoxy(35, 15);
 			if (id.arr != NULL && pw.arr != NULL) { // 데이터베이스에서 값을 찾았을 경우
 				clrscr();
-				count=2;
-				if(strcmp(officenumber.arr, "100")==0){ // 본사 계정으로 로그인
+				count = 2;
+				if (strcmp(officenumber.arr, "100") == 0) { // 본사 계정으로 로그인
 					select_HeadMain();
 				}
-				else{ //지사 계정으로 로그인
+				else { //지사 계정으로 로그인
 					select_BranchMain();
 				}
 			}
-		}
-		EXEC SQL CLOSE c_cursor;
-		EXEC SQL COMMIT;
-
-		if (count == 2) {
-			break;
 		}
 	}
 

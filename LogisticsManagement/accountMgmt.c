@@ -139,8 +139,6 @@ static const short sqlcud0[] =
 20,0,0,2,0,0,17,93,0,0,1,1,0,1,0,1,97,0,0,
 39,0,0,2,0,0,45,99,0,0,0,0,0,1,0,
 54,0,0,2,0,0,13,104,0,0,3,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,
-81,0,0,2,0,0,15,120,0,0,0,0,0,1,0,
-96,0,0,3,0,0,29,121,0,0,0,0,0,1,0,
 };
 
 
@@ -223,7 +221,7 @@ void select_login()
 	int count = 0;
 	while (1) {
 		clrscr();
-		gotoxy(0,1);
+		gotoxy(0, 1);
 		print_screen("login.txt");
 
 		if (count == 1) { // 이전에 아이디 비밀번호가 틀렸을 경우
@@ -337,7 +335,7 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 
 		/* EXEC SQL WHENEVER NOT FOUND DO break; */ 
 
-
+		
 		for (;;) {
 			/* EXEC SQL FETCH c_cursor INTO : officenumber, : id, : pw; */ 
 
@@ -397,61 +395,19 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 
 
 			officenumber.arr[officenumber.len] = '\0';
-			pw.arr[pw.len] = '\0';
+			id.arr[id.len] = '\0';
 			pw.arr[pw.len] = '\0';
 			gotoxy(35, 15);
 			if (id.arr != NULL && pw.arr != NULL) { // 데이터베이스에서 값을 찾았을 경우
 				clrscr();
-				count=2;
-				if(strcmp(officenumber.arr, "100")==0){ // 본사 계정으로 로그인
+				count = 2;
+				if (strcmp(officenumber.arr, "100") == 0) { // 본사 계정으로 로그인
 					select_HeadMain();
 				}
-				else{ //지사 계정으로 로그인
+				else { //지사 계정으로 로그인
 					select_BranchMain();
 				}
 			}
-		}
-		/* EXEC SQL CLOSE c_cursor; */ 
-
-{
-  struct sqlexd sqlstm;
-  sqlstm.sqlvsn = 13;
-  sqlstm.arrsiz = 3;
-  sqlstm.sqladtp = &sqladt;
-  sqlstm.sqltdsp = &sqltds;
-  sqlstm.iters = (unsigned int  )1;
-  sqlstm.offset = (unsigned int  )81;
-  sqlstm.cud = sqlcud0;
-  sqlstm.sqlest = (unsigned char  *)&sqlca;
-  sqlstm.sqlety = (unsigned short)4352;
-  sqlstm.occurs = (unsigned int  )0;
-  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
-}
-
-
-		/* EXEC SQL COMMIT; */ 
-
-{
-  struct sqlexd sqlstm;
-  sqlstm.sqlvsn = 13;
-  sqlstm.arrsiz = 3;
-  sqlstm.sqladtp = &sqladt;
-  sqlstm.sqltdsp = &sqltds;
-  sqlstm.iters = (unsigned int  )1;
-  sqlstm.offset = (unsigned int  )96;
-  sqlstm.cud = sqlcud0;
-  sqlstm.sqlest = (unsigned char  *)&sqlca;
-  sqlstm.sqlety = (unsigned short)4352;
-  sqlstm.occurs = (unsigned int  )0;
-  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
-}
-
-
-
-		if (count == 2) {
-			break;
 		}
 	}
 

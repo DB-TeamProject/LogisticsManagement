@@ -1,4 +1,4 @@
-// 최초작성자: 20183215 정현수 [2022.12.02]
+//최초작성자: 20183215 정현수 [2022.12.02]
 #define _CRT_SECURE_NO_WARNINGS
 #define PAGE_NUM 5
 
@@ -14,9 +14,9 @@
 #include <sqlcpr.h>
 
 
-// win32 Visual C 2010 이상컴파일시 추가
+//win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
-//-----------------------------------------
+/*-----------------------------------------*/
 
 
 /*---------------  화면 커서 위치 제어 ----------------------*/
@@ -26,7 +26,12 @@ void getxy(int* x, int* y);
 void clrscr(void);
 /*-----------------------------------------------------------*/
 void select_product();
+void insert_storage();
+void find_product();
 void sql_error();
+static char find_pid[100] = { NULL, };
+static char find_pname[100] = { NULL, };
+static char find_pprice[100] = { NULL, };
 
 EXEC SQL BEGIN DECLARE SECTION;
 VARCHAR uid[80];
@@ -35,11 +40,12 @@ EXEC SQL END DECLARE SECTION;
 
 #define getch() _getch()
 
-void addLogistics()
+void addStorage()
 {
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 	DB_connect();
 	select_product();
+	insert_storage();
 	EXEC SQL COMMIT WORK RELEASE;
 	getch();
 }
@@ -49,7 +55,7 @@ void select_product()
 {
 	clrscr();
 	gotoxy(0, 1);
-	print_screen("addLogistics.txt");
+	print_screen("addStorage.txt");
 
 	EXEC SQL BEGIN DECLARE SECTION;
 	varchar id[100];
@@ -76,9 +82,10 @@ void select_product()
 	/* cursor open */
 	EXEC SQL OPEN c_cursor;
 
-	EXEC SQL WHENEVER NOT FOUND DO break;
-	int y=10;
+	int y = 14;
+
 	for (;;) {
+		EXEC SQL WHENEVER NOT FOUND DO break;
 		EXEC SQL FETCH c_cursor INTO : id, : name, : amount, : price;
 
 		id.arr[id.len] = '\0';
@@ -91,7 +98,44 @@ void select_product()
 		y++;
 	}
 
-
 	EXEC SQL CLOSE c_cursor;
+
 	EXEC SQL COMMIT;
+}
+
+void insert_storage()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	char pid[100];
+	char pamount[100];
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+	//상품번호 입력
+	while (1) {
+		gotoxy(29, 8);
+		gets(pid);
+		if (strlen(pid) <= 0) {
+			printf("상품 번호를 입력하지 않았습니다.");
+		}
+		else {
+			break;
+		}
+	}
+
+	//수량 입력
+	gotoxy(55, 8);
+	gets(pamount);
+
+	sprintf(dynstmt, "insert into storage values ( '100', '%s', '패딩', '%s', '20000')",
+		pid, pamount);
+	gotoxy(20, 9);
+	printf("주문 성공하였습니다.");
+	/* 실행시킬 SQL 문장*/
+	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
+
+	EXEC SQL COMMIT WORK;
+
 }

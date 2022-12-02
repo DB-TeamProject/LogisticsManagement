@@ -60,16 +60,16 @@ static struct sqltdss sqltds =
 struct sqlcxp
 {
   unsigned short fillen;
-           char  filnam[16];
+           char  filnam[14];
 };
 static const struct sqlcxp sqlfpn =
 {
-    15,
-    "addLogistics.pc"
+    13,
+    "addStorage.pc"
 };
 
 
-static unsigned int sqlctx = 2212611;
+static unsigned int sqlctx = 558675;
 
 
 static struct sqlexd {
@@ -135,16 +135,18 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,43,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,71,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,77,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,82,0,0,4,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
-85,0,0,2,0,0,15,95,0,0,0,0,0,1,0,
-100,0,0,3,0,0,29,96,0,0,0,0,0,1,0,
+5,0,0,1,0,0,30,49,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,77,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,83,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,89,0,0,4,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+85,0,0,2,0,0,15,101,0,0,0,0,0,1,0,
+100,0,0,3,0,0,29,103,0,0,0,0,0,1,0,
+115,0,0,4,0,0,24,138,0,0,1,1,0,1,0,1,97,0,0,
+134,0,0,5,0,0,29,140,0,0,0,0,0,1,0,
 };
 
 
-// 최초작성자: 20183215 정현수 [2022.12.02]
+//최초작성자: 20183215 정현수 [2022.12.02]
 #define _CRT_SECURE_NO_WARNINGS
 #define PAGE_NUM 5
 
@@ -160,9 +162,9 @@ static const short sqlcud0[] =
 #include <sqlcpr.h>
 
 
-// win32 Visual C 2010 이상컴파일시 추가
+//win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
-//-----------------------------------------
+/*-----------------------------------------*/
 
 
 /*---------------  화면 커서 위치 제어 ----------------------*/
@@ -172,7 +174,12 @@ void getxy(int* x, int* y);
 void clrscr(void);
 /*-----------------------------------------------------------*/
 void select_product();
+void insert_storage();
+void find_product();
 void sql_error();
+static char find_pid[100] = { NULL, };
+static char find_pname[100] = { NULL, };
+static char find_pprice[100] = { NULL, };
 
 /* EXEC SQL BEGIN DECLARE SECTION; */ 
 
@@ -187,11 +194,12 @@ struct { unsigned short len; unsigned char arr[20]; } pwd;
 
 #define getch() _getch()
 
-void addLogistics()
+void addStorage()
 {
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 	DB_connect();
 	select_product();
+	insert_storage();
 	/* EXEC SQL COMMIT WORK RELEASE; */ 
 
 {
@@ -218,7 +226,7 @@ void select_product()
 {
 	clrscr();
 	gotoxy(0, 1);
-	print_screen("addLogistics.txt");
+	print_screen("addStorage.txt");
 
 	/* EXEC SQL BEGIN DECLARE SECTION; */ 
 
@@ -315,10 +323,11 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 
 
 
-	/* EXEC SQL WHENEVER NOT FOUND DO break; */ 
+	int y = 14;
 
-	int y=10;
 	for (;;) {
+		/* EXEC SQL WHENEVER NOT FOUND DO break; */ 
+
 		/* EXEC SQL FETCH c_cursor INTO : id, : name, : amount, : price; */ 
 
 {
@@ -395,7 +404,6 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 		y++;
 	}
 
-
 	/* EXEC SQL CLOSE c_cursor; */ 
 
 {
@@ -415,6 +423,7 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 }
 
 
+
 	/* EXEC SQL COMMIT; */ 
 
 {
@@ -432,6 +441,101 @@ struct { unsigned short len; unsigned char arr[100]; } price;
  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
 }
+
+
+}
+
+void insert_storage()
+{
+	/* EXEC SQL BEGIN DECLARE SECTION; */ 
+
+	char dynstmt[1000];
+	/* EXEC SQL END DECLARE SECTION; */ 
+
+
+	char pid[100];
+	char pamount[100];
+	/* EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n"); */ 
+
+
+	//상품번호 입력
+	while (1) {
+		gotoxy(29, 8);
+		gets(pid);
+		if (strlen(pid) <= 0) {
+			printf("상품 번호를 입력하지 않았습니다.");
+		}
+		else {
+			break;
+		}
+	}
+
+	//수량 입력
+	gotoxy(55, 8);
+	gets(pamount);
+
+	sprintf(dynstmt, "insert into storage values ( '100', '%s', '패딩', '%s', '20000')",
+		pid, pamount);
+	gotoxy(20, 9);
+	printf("주문 성공하였습니다.");
+	/* 실행시킬 SQL 문장*/
+	/* EXEC SQL EXECUTE IMMEDIATE : dynstmt; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )115;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqhstv[0] = (         void  *)dynstmt;
+ sqlstm.sqhstl[0] = (unsigned int  )1000;
+ sqlstm.sqhsts[0] = (         int  )0;
+ sqlstm.sqindv[0] = (         void  *)0;
+ sqlstm.sqinds[0] = (         int  )0;
+ sqlstm.sqharm[0] = (unsigned int  )0;
+ sqlstm.sqadto[0] = (unsigned short )0;
+ sqlstm.sqtdso[0] = (unsigned short )0;
+ sqlstm.sqphsv = sqlstm.sqhstv;
+ sqlstm.sqphsl = sqlstm.sqhstl;
+ sqlstm.sqphss = sqlstm.sqhsts;
+ sqlstm.sqpind = sqlstm.sqindv;
+ sqlstm.sqpins = sqlstm.sqinds;
+ sqlstm.sqparm = sqlstm.sqharm;
+ sqlstm.sqparc = sqlstm.sqharc;
+ sqlstm.sqpadto = sqlstm.sqadto;
+ sqlstm.sqptdso = sqlstm.sqtdso;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode == 1403)
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	/* EXEC SQL COMMIT WORK; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )134;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
 
 
 }
