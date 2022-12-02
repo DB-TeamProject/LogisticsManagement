@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="accountMgmt.c" />
+    <ClCompile Include="loginex.cpp" />
     <ClCompile Include="mainMenu.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

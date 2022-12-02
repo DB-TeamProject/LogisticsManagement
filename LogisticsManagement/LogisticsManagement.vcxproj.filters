@@ -15,7 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="loginex.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="mainMenu.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="accountMgmt.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

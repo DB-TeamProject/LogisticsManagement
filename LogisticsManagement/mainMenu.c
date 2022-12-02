@@ -135,16 +135,15 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,48,0,0,0,0,0,1,0,
-20,0,0,0,0,0,27,58,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
-51,0,0,3,0,0,31,154,0,0,0,0,0,1,0,
+5,0,0,1,0,0,30,49,0,0,0,0,0,1,0,
+20,0,0,0,0,0,27,59,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
+51,0,0,3,0,0,31,155,0,0,0,0,0,1,0,
 };
 
 
-// 마지막고침 : 2020.11.17
-// win32 Visual C 2010 이상컴파일시 추가
-// 프로그램 가장 첫 줄에 추가할 것
+// 최초작성자: 20183215 정현수 [2022.12.01]
 #define _CRT_SECURE_NO_WARNINGS
+#define PAGE_NUM 5
 //-----------------------------------------
 
 #include <stdlib.h>
@@ -157,6 +156,8 @@ static const short sqlcud0[] =
 #include <sqlda.h>
 #include <sqlca.h>
 #include <sqlcpr.h>
+
+extern void login();
 
 
 // win32 Visual C 2010 이상컴파일시 추가
@@ -172,7 +173,6 @@ void clrscr(void);
 void print_screen(char fname[]);
 void DB_connect();
 void select_main();
-
 void sql_error();
 
 /* EXEC SQL BEGIN DECLARE SECTION; */ 
@@ -193,6 +193,7 @@ void main()
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 
 	DB_connect();
+	login();
 	select_main();
 	/* EXEC SQL COMMIT WORK RELEASE; */ 
 
@@ -281,16 +282,16 @@ void DB_connect()
 	printf("Oracle Connect SUCCESS by %s\n", uid.arr);
 }
 
-#define PAGE_NUM 5
-void select_main()
-{
-	/* 사용자 입력 */
+void select_main(){
+	
+	// 메인 화면
 	clrscr();
+	gotoxy(0,1);
 	print_screen("mainMenu.txt");
 	int cursor_position = 10; // 현재 커서 위치
 	int input_status; // 입력 상태
 	while (1) {
-		gotoxy(20, cursor_position);
+		gotoxy(42, cursor_position);
 		input_status = _getch();
 		if (input_status == 72 || input_status == 80) { //윗방향 또는 아래방향을 입력받았을 경우
 
