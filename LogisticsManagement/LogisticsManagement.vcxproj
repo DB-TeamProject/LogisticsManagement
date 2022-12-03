@@ -22,8 +22,7 @@
     <ClCompile Include="accountMgmt.c" />
     <ClCompile Include="addStorage.c" />
     <ClCompile Include="mainMenu.c" />
-    <ClCompile Include="소스.cpp" />
-    <ClCompile Include="소스1.cpp" />
+    <ClCompile Include="select_BranchAccount.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -25,13 +25,21 @@ void gotoxy(int x, int y);
 void getxy(int* x, int* y);
 void clrscr(void);
 /*-----------------------------------------------------------*/
+void get_tuple();
 void select_product();
-void insert_storage();
+void input_value();
+void update_storage();
+void update_businessStorage();
+void select_nowStoragePamount();
+void select_nowBusinessStoragePamount();
 void find_product();
 void sql_error();
-static char find_pid[100] = { NULL, };
-static char find_pname[100] = { NULL, };
-static char find_pprice[100] = { NULL, };
+
+extern void select_ProductMain();
+char find_pid[100];
+char find_pamount[100];
+char now_pamount[100];
+char now_businessPamount[100];
 
 EXEC SQL BEGIN DECLARE SECTION;
 VARCHAR uid[80];
@@ -44,14 +52,18 @@ void addStorage()
 {
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 	DB_connect();
-	select_product();
-	insert_storage();
+	get_tuple();
+	input_value(); // 사용자 입력 전역변수로 저장
+	select_nowStoragePamount(); //사용자가 입력한 상품의 현재 본사 창고 수량 체크
+	select_nowBusinessStoragePamount(); //사용자가 입력한 상품의 현재 업체 창고 수량 체크
+	update_businessStorage();
+	update_storage();
 	EXEC SQL COMMIT WORK RELEASE;
 	getch();
 }
 
 
-void select_product()
+void get_tuple()
 {
 	clrscr();
 	gotoxy(0, 1);
@@ -72,7 +84,7 @@ void select_product()
 
 
 	/* 실행시킬 SQL 문장*/
-	sprintf(dynstmt, "SELECT pid, pname, pamount, pprice FROM BusinessStorage");
+	sprintf(dynstmt, "SELECT b.pid, p.pname, b.pamount, p.pprice FROM businessstorage b join productinfo p on b.pid = p.pid");
 
 	EXEC SQL PREPARE S FROM : dynstmt;
 
@@ -81,61 +93,143 @@ void select_product()
 
 	/* cursor open */
 	EXEC SQL OPEN c_cursor;
+	gotoxy(20, 13);
+	printf(" 상품코드  |이름           |수량      |가격    ");
+	gotoxy(20, 14);
+	printf("----------------------------------------------");
+	int y = 15;
 
-	int y = 14;
+	for (;;)
+	{
 
-	for (;;) {
-		EXEC SQL WHENEVER NOT FOUND DO break;
 		EXEC SQL FETCH c_cursor INTO : id, : name, : amount, : price;
+		if (sqlca.sqlcode == 1403) break;
 
 		id.arr[id.len] = '\0';
 		name.arr[name.len] = '\0';
 		amount.arr[amount.len] = '\0';
 		price.arr[price.len] = '\0';
-
-		gotoxy(30, y);
+		gotoxy(20, y);
 		printf(" %-10s|%-15s|%-10s|%-10s", id.arr, name.arr, amount.arr, price.arr);
 		y++;
+
+
 	}
 
+	/* Close the cursor. */
 	EXEC SQL CLOSE c_cursor;
-
-	EXEC SQL COMMIT;
 }
 
-void insert_storage()
+void input_value()
+{
+	gotoxy(29, 9);
+	gets(find_pid);// 전역변수에 저장
+
+	//수량 입력
+	gotoxy(55, 9);
+	gets(find_pamount);// 전역변수에 저장
+}
+
+void update_storage()
 {
 	EXEC SQL BEGIN DECLARE SECTION;
 	char dynstmt[1000];
 	EXEC SQL END DECLARE SECTION;
 
-	char pid[100];
-	char pamount[100];
 	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
 
-	//상품번호 입력
-	while (1) {
-		gotoxy(29, 8);
-		gets(pid);
-		if (strlen(pid) <= 0) {
-			printf("상품 번호를 입력하지 않았습니다.");
-		}
-		else {
-			break;
-		}
-	}
 
-	//수량 입력
-	gotoxy(55, 8);
-	gets(pamount);
-
-	sprintf(dynstmt, "insert into storage values ( '100', '%s', '패딩', '%s', '20000')",
-		pid, pamount);
-	gotoxy(20, 9);
-	printf("주문 성공하였습니다.");
-	/* 실행시킬 SQL 문장*/
+	int i = atoi(now_pamount) + atoi(find_pamount);
+	char result[100];
+	snprintf(result, 10, "%d", i);
+	sprintf(dynstmt, "update storage set pamount = '%s' where pid = '%s'", result, find_pid);
 	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
 
 	EXEC SQL COMMIT WORK;
 
+	gotoxy(40, 10);
+	printf("[ 주문 성공하였습니다. ]");
+
+	Sleep(1000);
+
+	select_ProductMain();
 }
+
+void update_businessStorage() { // 주문한 수량만큼 업체 재고에서 빼줌
+	EXEC SQL BEGIN DECLARE SECTION;
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	char name[100];
+	char price[100];
+
+	/* Register sql_error() as the error handler. */
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+	int i = atoi(now_businessPamount) - atoi(find_pamount);
+	char result[100];
+	snprintf(result, 10, "%d", i);
+
+	sprintf(dynstmt, "update businessstorage set pamount = '%s' where pid = '%s' ", result, find_pid);
+
+	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
+
+	EXEC SQL COMMIT WORK;
+}
+
+void select_nowStoragePamount() {
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar v_pamount[100];
+	char dynstmt[1000];
+
+	EXEC SQL END DECLARE SECTION;
+
+
+	sprintf(dynstmt, "SELECT pamount FROM storage where pid = '%s'", find_pid);
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE c_cursor1 CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN c_cursor1;
+
+	for (;;)
+	{
+		if (sqlca.sqlcode == 1403) break;
+		EXEC SQL FETCH c_cursor1 INTO : v_pamount;
+
+		v_pamount.arr[v_pamount.len] = '\0';
+		strcpy(now_pamount, v_pamount.arr);
+	}
+}
+
+void select_nowBusinessStoragePamount() {
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar v_pamount[100];
+	char dynstmt[1000];
+
+	EXEC SQL END DECLARE SECTION;
+
+
+	sprintf(dynstmt, "SELECT pamount FROM businessstorage where pid = '%s'", find_pid);
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE c_cursor2 CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN c_cursor2;
+
+	for (;;)
+	{
+		if (sqlca.sqlcode == 1403) break;
+		EXEC SQL FETCH c_cursor2 INTO : v_pamount;
+
+		v_pamount.arr[v_pamount.len] = '\0';
+		strcpy(now_businessPamount, v_pamount.arr);
+	}
+}
+

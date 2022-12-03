@@ -135,14 +135,21 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,49,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,77,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,83,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,89,0,0,4,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
-85,0,0,2,0,0,15,101,0,0,0,0,0,1,0,
-100,0,0,3,0,0,29,103,0,0,0,0,0,1,0,
-115,0,0,4,0,0,24,138,0,0,1,1,0,1,0,1,97,0,0,
-134,0,0,5,0,0,29,140,0,0,0,0,0,1,0,
+5,0,0,1,0,0,30,61,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,89,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,95,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,105,0,0,4,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+85,0,0,2,0,0,15,120,0,0,0,0,0,1,0,
+100,0,0,3,0,0,24,146,0,0,1,1,0,1,0,1,97,0,0,
+119,0,0,4,0,0,29,148,0,0,0,0,0,1,0,
+134,0,0,5,0,0,24,175,0,0,1,1,0,1,0,1,97,0,0,
+153,0,0,6,0,0,29,177,0,0,0,0,0,1,0,
+168,0,0,2,0,0,17,190,0,0,1,1,0,1,0,1,97,0,0,
+187,0,0,2,0,0,45,196,0,0,0,0,0,1,0,
+202,0,0,2,0,0,13,201,0,0,1,0,0,1,0,2,9,0,0,
+221,0,0,2,0,0,17,218,0,0,1,1,0,1,0,1,97,0,0,
+240,0,0,2,0,0,45,224,0,0,0,0,0,1,0,
+255,0,0,2,0,0,13,229,0,0,1,0,0,1,0,2,9,0,0,
 };
 
 
@@ -173,13 +180,21 @@ void gotoxy(int x, int y);
 void getxy(int* x, int* y);
 void clrscr(void);
 /*-----------------------------------------------------------*/
+void get_tuple();
 void select_product();
-void insert_storage();
+void input_value();
+void update_storage();
+void update_businessStorage();
+void select_nowStoragePamount();
+void select_nowBusinessStoragePamount();
 void find_product();
 void sql_error();
-static char find_pid[100] = { NULL, };
-static char find_pname[100] = { NULL, };
-static char find_pprice[100] = { NULL, };
+
+extern void select_ProductMain();
+char find_pid[100];
+char find_pamount[100];
+char now_pamount[100];
+char now_businessPamount[100];
 
 /* EXEC SQL BEGIN DECLARE SECTION; */ 
 
@@ -198,8 +213,12 @@ void addStorage()
 {
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 	DB_connect();
-	select_product();
-	insert_storage();
+	get_tuple();
+	input_value(); // 사용자 입력 전역변수로 저장
+	select_nowStoragePamount(); //사용자가 입력한 상품의 현재 본사 창고 수량 체크
+	select_nowBusinessStoragePamount(); //사용자가 입력한 상품의 현재 업체 창고 수량 체크
+	update_businessStorage();
+	update_storage();
 	/* EXEC SQL COMMIT WORK RELEASE; */ 
 
 {
@@ -222,7 +241,7 @@ void addStorage()
 }
 
 
-void select_product()
+void get_tuple()
 {
 	clrscr();
 	gotoxy(0, 1);
@@ -254,7 +273,7 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 
 
 	/* 실행시킬 SQL 문장*/
-	sprintf(dynstmt, "SELECT pid, pname, pamount, pprice FROM BusinessStorage");
+	sprintf(dynstmt, "SELECT b.pid, p.pname, b.pamount, p.pprice FROM businessstorage b join productinfo p on b.pid = p.pid");
 
 	/* EXEC SQL PREPARE S FROM : dynstmt; */ 
 
@@ -322,11 +341,14 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 }
 
 
+	gotoxy(20, 13);
+	printf(" 상품코드  |이름           |수량      |가격    ");
+	gotoxy(20, 14);
+	printf("----------------------------------------------");
+	int y = 15;
 
-	int y = 14;
-
-	for (;;) {
-		/* EXEC SQL WHENEVER NOT FOUND DO break; */ 
+	for (;;)
+	{
 
 		/* EXEC SQL FETCH c_cursor INTO : id, : name, : amount, : price; */ 
 
@@ -388,22 +410,24 @@ struct { unsigned short len; unsigned char arr[100]; } price;
   sqlstm.sqpadto = sqlstm.sqadto;
   sqlstm.sqptdso = sqlstm.sqtdso;
   sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-  if (sqlca.sqlcode == 1403) break;
   if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
 }
 
 
+		if (sqlca.sqlcode == 1403) break;
 
 		id.arr[id.len] = '\0';
 		name.arr[name.len] = '\0';
 		amount.arr[amount.len] = '\0';
 		price.arr[price.len] = '\0';
-
-		gotoxy(30, y);
+		gotoxy(20, y);
 		printf(" %-10s|%-15s|%-10s|%-10s", id.arr, name.arr, amount.arr, price.arr);
 		y++;
+
+
 	}
 
+	/* Close the cursor. */
 	/* EXEC SQL CLOSE c_cursor; */ 
 
 {
@@ -423,29 +447,19 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 }
 
 
+}
 
-	/* EXEC SQL COMMIT; */ 
-
+void input_value()
 {
- struct sqlexd sqlstm;
- sqlstm.sqlvsn = 13;
- sqlstm.arrsiz = 4;
- sqlstm.sqladtp = &sqladt;
- sqlstm.sqltdsp = &sqltds;
- sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )100;
- sqlstm.cud = sqlcud0;
- sqlstm.sqlest = (unsigned char  *)&sqlca;
- sqlstm.sqlety = (unsigned short)4352;
- sqlstm.occurs = (unsigned int  )0;
- sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
- if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+	gotoxy(29, 9);
+	gets(find_pid);// 전역변수에 저장
+
+	//수량 입력
+	gotoxy(55, 9);
+	gets(find_pamount);// 전역변수에 저장
 }
 
-
-}
-
-void insert_storage()
+void update_storage()
 {
 	/* EXEC SQL BEGIN DECLARE SECTION; */ 
 
@@ -453,32 +467,14 @@ void insert_storage()
 	/* EXEC SQL END DECLARE SECTION; */ 
 
 
-	char pid[100];
-	char pamount[100];
 	/* EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n"); */ 
 
 
-	//상품번호 입력
-	while (1) {
-		gotoxy(29, 8);
-		gets(pid);
-		if (strlen(pid) <= 0) {
-			printf("상품 번호를 입력하지 않았습니다.");
-		}
-		else {
-			break;
-		}
-	}
 
-	//수량 입력
-	gotoxy(55, 8);
-	gets(pamount);
-
-	sprintf(dynstmt, "insert into storage values ( '100', '%s', '패딩', '%s', '20000')",
-		pid, pamount);
-	gotoxy(20, 9);
-	printf("주문 성공하였습니다.");
-	/* 실행시킬 SQL 문장*/
+	int i = atoi(now_pamount) + atoi(find_pamount);
+	char result[100];
+	snprintf(result, 10, "%d", i);
+	sprintf(dynstmt, "update storage set pamount = '%s' where pid = '%s'", result, find_pid);
 	/* EXEC SQL EXECUTE IMMEDIATE : dynstmt; */ 
 
 {
@@ -489,7 +485,7 @@ void insert_storage()
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )115;
+ sqlstm.offset = (unsigned int  )100;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -512,7 +508,6 @@ void insert_storage()
  sqlstm.sqpadto = sqlstm.sqadto;
  sqlstm.sqptdso = sqlstm.sqtdso;
  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
- if (sqlca.sqlcode == 1403)
  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
 }
 
@@ -527,7 +522,7 @@ void insert_storage()
  sqlstm.sqladtp = &sqladt;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )134;
+ sqlstm.offset = (unsigned int  )119;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -538,4 +533,350 @@ void insert_storage()
 
 
 
+	gotoxy(40, 10);
+	printf("[ 주문 성공하였습니다. ]");
+
+	Sleep(1000);
+
+	select_ProductMain();
 }
+
+void update_businessStorage() { // 주문한 수량만큼 업체 재고에서 빼줌
+	/* EXEC SQL BEGIN DECLARE SECTION; */ 
+
+	char dynstmt[1000];
+	/* EXEC SQL END DECLARE SECTION; */ 
+
+
+	char name[100];
+	char price[100];
+
+	/* Register sql_error() as the error handler. */
+	/* EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n"); */ 
+
+
+	int i = atoi(now_businessPamount) - atoi(find_pamount);
+	char result[100];
+	snprintf(result, 10, "%d", i);
+
+	sprintf(dynstmt, "update businessstorage set pamount = '%s' where pid = '%s' ", result, find_pid);
+
+	/* EXEC SQL EXECUTE IMMEDIATE : dynstmt; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )134;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqhstv[0] = (         void  *)dynstmt;
+ sqlstm.sqhstl[0] = (unsigned int  )1000;
+ sqlstm.sqhsts[0] = (         int  )0;
+ sqlstm.sqindv[0] = (         void  *)0;
+ sqlstm.sqinds[0] = (         int  )0;
+ sqlstm.sqharm[0] = (unsigned int  )0;
+ sqlstm.sqadto[0] = (unsigned short )0;
+ sqlstm.sqtdso[0] = (unsigned short )0;
+ sqlstm.sqphsv = sqlstm.sqhstv;
+ sqlstm.sqphsl = sqlstm.sqhstl;
+ sqlstm.sqphss = sqlstm.sqhsts;
+ sqlstm.sqpind = sqlstm.sqindv;
+ sqlstm.sqpins = sqlstm.sqinds;
+ sqlstm.sqparm = sqlstm.sqharm;
+ sqlstm.sqparc = sqlstm.sqharc;
+ sqlstm.sqpadto = sqlstm.sqadto;
+ sqlstm.sqptdso = sqlstm.sqtdso;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	/* EXEC SQL COMMIT WORK; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )153;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+}
+
+void select_nowStoragePamount() {
+	/* EXEC SQL BEGIN DECLARE SECTION; */ 
+
+	/* varchar v_pamount[100]; */ 
+struct { unsigned short len; unsigned char arr[100]; } v_pamount;
+
+	char dynstmt[1000];
+
+	/* EXEC SQL END DECLARE SECTION; */ 
+
+
+
+	sprintf(dynstmt, "SELECT pamount FROM storage where pid = '%s'", find_pid);
+
+	/* EXEC SQL PREPARE S FROM : dynstmt; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )168;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqhstv[0] = (         void  *)dynstmt;
+ sqlstm.sqhstl[0] = (unsigned int  )1000;
+ sqlstm.sqhsts[0] = (         int  )0;
+ sqlstm.sqindv[0] = (         void  *)0;
+ sqlstm.sqinds[0] = (         int  )0;
+ sqlstm.sqharm[0] = (unsigned int  )0;
+ sqlstm.sqadto[0] = (unsigned short )0;
+ sqlstm.sqtdso[0] = (unsigned short )0;
+ sqlstm.sqphsv = sqlstm.sqhstv;
+ sqlstm.sqphsl = sqlstm.sqhstl;
+ sqlstm.sqphss = sqlstm.sqhsts;
+ sqlstm.sqpind = sqlstm.sqindv;
+ sqlstm.sqpins = sqlstm.sqinds;
+ sqlstm.sqparm = sqlstm.sqharm;
+ sqlstm.sqparc = sqlstm.sqharc;
+ sqlstm.sqpadto = sqlstm.sqadto;
+ sqlstm.sqptdso = sqlstm.sqtdso;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	/* cursor 선언 */
+	/* EXEC SQL DECLARE c_cursor1 CURSOR FOR S; */ 
+
+
+	/* cursor open */
+	/* EXEC SQL OPEN c_cursor1; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )187;
+ sqlstm.selerr = (unsigned short)1;
+ sqlstm.sqlpfmem = (unsigned int  )0;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqcmod = (unsigned int )0;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	for (;;)
+	{
+		if (sqlca.sqlcode == 1403) break;
+		/* EXEC SQL FETCH c_cursor1 INTO : v_pamount; */ 
+
+{
+  struct sqlexd sqlstm;
+  sqlstm.sqlvsn = 13;
+  sqlstm.arrsiz = 4;
+  sqlstm.sqladtp = &sqladt;
+  sqlstm.sqltdsp = &sqltds;
+  sqlstm.iters = (unsigned int  )1;
+  sqlstm.offset = (unsigned int  )202;
+  sqlstm.selerr = (unsigned short)1;
+  sqlstm.sqlpfmem = (unsigned int  )0;
+  sqlstm.cud = sqlcud0;
+  sqlstm.sqlest = (unsigned char  *)&sqlca;
+  sqlstm.sqlety = (unsigned short)4352;
+  sqlstm.occurs = (unsigned int  )0;
+  sqlstm.sqfoff = (           int )0;
+  sqlstm.sqfmod = (unsigned int )2;
+  sqlstm.sqhstv[0] = (         void  *)&v_pamount;
+  sqlstm.sqhstl[0] = (unsigned int  )102;
+  sqlstm.sqhsts[0] = (         int  )0;
+  sqlstm.sqindv[0] = (         void  *)0;
+  sqlstm.sqinds[0] = (         int  )0;
+  sqlstm.sqharm[0] = (unsigned int  )0;
+  sqlstm.sqadto[0] = (unsigned short )0;
+  sqlstm.sqtdso[0] = (unsigned short )0;
+  sqlstm.sqphsv = sqlstm.sqhstv;
+  sqlstm.sqphsl = sqlstm.sqhstl;
+  sqlstm.sqphss = sqlstm.sqhsts;
+  sqlstm.sqpind = sqlstm.sqindv;
+  sqlstm.sqpins = sqlstm.sqinds;
+  sqlstm.sqparm = sqlstm.sqharm;
+  sqlstm.sqparc = sqlstm.sqharc;
+  sqlstm.sqpadto = sqlstm.sqadto;
+  sqlstm.sqptdso = sqlstm.sqtdso;
+  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+		v_pamount.arr[v_pamount.len] = '\0';
+		strcpy(now_pamount, v_pamount.arr);
+	}
+}
+
+void select_nowBusinessStoragePamount() {
+	/* EXEC SQL BEGIN DECLARE SECTION; */ 
+
+	/* varchar v_pamount[100]; */ 
+struct { unsigned short len; unsigned char arr[100]; } v_pamount;
+
+	char dynstmt[1000];
+
+	/* EXEC SQL END DECLARE SECTION; */ 
+
+
+
+	sprintf(dynstmt, "SELECT pamount FROM businessstorage where pid = '%s'", find_pid);
+
+	/* EXEC SQL PREPARE S FROM : dynstmt; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )221;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqhstv[0] = (         void  *)dynstmt;
+ sqlstm.sqhstl[0] = (unsigned int  )1000;
+ sqlstm.sqhsts[0] = (         int  )0;
+ sqlstm.sqindv[0] = (         void  *)0;
+ sqlstm.sqinds[0] = (         int  )0;
+ sqlstm.sqharm[0] = (unsigned int  )0;
+ sqlstm.sqadto[0] = (unsigned short )0;
+ sqlstm.sqtdso[0] = (unsigned short )0;
+ sqlstm.sqphsv = sqlstm.sqhstv;
+ sqlstm.sqphsl = sqlstm.sqhstl;
+ sqlstm.sqphss = sqlstm.sqhsts;
+ sqlstm.sqpind = sqlstm.sqindv;
+ sqlstm.sqpins = sqlstm.sqinds;
+ sqlstm.sqparm = sqlstm.sqharm;
+ sqlstm.sqparc = sqlstm.sqharc;
+ sqlstm.sqpadto = sqlstm.sqadto;
+ sqlstm.sqptdso = sqlstm.sqtdso;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	/* cursor 선언 */
+	/* EXEC SQL DECLARE c_cursor2 CURSOR FOR S; */ 
+
+
+	/* cursor open */
+	/* EXEC SQL OPEN c_cursor2; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 4;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )240;
+ sqlstm.selerr = (unsigned short)1;
+ sqlstm.sqlpfmem = (unsigned int  )0;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqcmod = (unsigned int )0;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	for (;;)
+	{
+		if (sqlca.sqlcode == 1403) break;
+		/* EXEC SQL FETCH c_cursor2 INTO : v_pamount; */ 
+
+{
+  struct sqlexd sqlstm;
+  sqlstm.sqlvsn = 13;
+  sqlstm.arrsiz = 4;
+  sqlstm.sqladtp = &sqladt;
+  sqlstm.sqltdsp = &sqltds;
+  sqlstm.iters = (unsigned int  )1;
+  sqlstm.offset = (unsigned int  )255;
+  sqlstm.selerr = (unsigned short)1;
+  sqlstm.sqlpfmem = (unsigned int  )0;
+  sqlstm.cud = sqlcud0;
+  sqlstm.sqlest = (unsigned char  *)&sqlca;
+  sqlstm.sqlety = (unsigned short)4352;
+  sqlstm.occurs = (unsigned int  )0;
+  sqlstm.sqfoff = (           int )0;
+  sqlstm.sqfmod = (unsigned int )2;
+  sqlstm.sqhstv[0] = (         void  *)&v_pamount;
+  sqlstm.sqhstl[0] = (unsigned int  )102;
+  sqlstm.sqhsts[0] = (         int  )0;
+  sqlstm.sqindv[0] = (         void  *)0;
+  sqlstm.sqinds[0] = (         int  )0;
+  sqlstm.sqharm[0] = (unsigned int  )0;
+  sqlstm.sqadto[0] = (unsigned short )0;
+  sqlstm.sqtdso[0] = (unsigned short )0;
+  sqlstm.sqphsv = sqlstm.sqhstv;
+  sqlstm.sqphsl = sqlstm.sqhstl;
+  sqlstm.sqphss = sqlstm.sqhsts;
+  sqlstm.sqpind = sqlstm.sqindv;
+  sqlstm.sqpins = sqlstm.sqinds;
+  sqlstm.sqparm = sqlstm.sqharm;
+  sqlstm.sqparc = sqlstm.sqharc;
+  sqlstm.sqpadto = sqlstm.sqadto;
+  sqlstm.sqptdso = sqlstm.sqtdso;
+  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+		v_pamount.arr[v_pamount.len] = '\0';
+		strcpy(now_businessPamount, v_pamount.arr);
+	}
+}
+
