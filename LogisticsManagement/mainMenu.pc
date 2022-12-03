@@ -16,6 +16,7 @@
 
 extern void login();
 extern void addStorage();
+extern void select_BranchAccount();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -155,6 +156,7 @@ void select_BranchMain() {
 			else if (cursor_position == 14) {//세번째 행
 			}
 			else if (cursor_position == 16) {//네번째 행
+				select_BranchAccount();
 			}
 			else if (cursor_position == 18) {//다섯번째 행
 				login();
