@@ -153,7 +153,7 @@ static const short sqlcud0[] =
 };
 
 
-//최초작성자: 20183215 정현수 [2022.12.02]
+//최초작성자: 20183215 정현수 [2022.12.04]
 #define _CRT_SECURE_NO_WARNINGS
 #define PAGE_NUM 5
 
@@ -342,7 +342,7 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 
 
 	gotoxy(20, 13);
-	printf(" 상품코드  |이름           |수량      |가격    ");
+	printf(" 상품코드  |이름           |수량      |개당 가격    ");
 	gotoxy(20, 14);
 	printf("----------------------------------------------");
 	int y = 15;

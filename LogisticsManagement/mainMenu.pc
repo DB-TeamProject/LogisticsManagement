@@ -17,6 +17,7 @@
 extern void login();
 extern void addStorage();
 extern void select_BranchAccount();
+extern void searchStorageStock();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -198,6 +199,7 @@ void select_ProductMain() {
 		else if (input_status == 13) { // 엔터키를 입력받았을 경우
 			clrscr();
 			if (cursor_position == 10) { //첫번째 행
+				searchStorageStock();
 			}
 			else if (cursor_position == 12) {//두번째 행
 				addStorage();

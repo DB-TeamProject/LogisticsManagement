@@ -1,0 +1,115 @@
+//최초작성자: 20183215 정현수 [2022.12.04]
+#define _CRT_SECURE_NO_WARNINGS
+#define PAGE_NUM 5
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <conio.h>
+
+/* for oracle */
+#include <sqlda.h>
+#include <sqlca.h>
+#include <sqlcpr.h>
+
+
+//win32 Visual C 2010 이상컴파일시 추가
+#define getch() _getch()
+/*-----------------------------------------*/
+
+
+/*---------------  화면 커서 위치 제어 ----------------------*/
+#include < windows.h >
+void gotoxy(int x, int y);
+void getxy(int* x, int* y);
+void clrscr(void);
+/*-----------------------------------------------------------*/
+void get_StorageStock();
+void check_enter();
+
+extern void select_ProductMain();
+
+EXEC SQL BEGIN DECLARE SECTION;
+VARCHAR uid[80];
+VARCHAR pwd[20];
+EXEC SQL END DECLARE SECTION;
+
+#define getch() _getch()
+
+void searchStorageStock()
+{
+	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
+	DB_connect();
+	get_StorageStock();
+	check_enter();
+	EXEC SQL COMMIT WORK RELEASE;
+	getch();
+}
+
+
+void get_StorageStock()
+{
+	clrscr();
+	gotoxy(0, 1);
+	print_screen("searchStorageStock.txt");
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar id[100];
+	varchar name[100];
+	varchar amount[100];
+	varchar price[100];
+
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+
+	/* Register sql_error() as the error handler. */
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+
+	/* 실행시킬 SQL 문장*/
+	sprintf(dynstmt, "SELECT s.pid, p.pname, s.pamount, p.pprice FROM storage s join productinfo p on s.pid = p.pid");
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE c_cursor CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN c_cursor;
+	gotoxy(20, 9);
+	printf(" 상품코드  |이름           |수량      |개당 가격    ");
+	gotoxy(20, 10);
+	printf("----------------------------------------------");
+	int y = 11;
+
+	for (;;)
+	{
+		EXEC SQL FETCH c_cursor INTO : id, : name, : amount, : price;
+		if (sqlca.sqlcode == 1403) break;
+
+		id.arr[id.len] = '\0';
+		name.arr[name.len] = '\0';
+		amount.arr[amount.len] = '\0';
+		price.arr[price.len] = '\0';
+		gotoxy(20, y);
+		printf(" %-10s|%-15s|%-10s|%-10s", id.arr, name.arr, amount.arr, price.arr);
+		y++;
+	}
+
+	/* Close the cursor. */
+	EXEC SQL CLOSE c_cursor;
+}
+
+void check_enter()
+{
+	int input_status; // 입력 상태
+	while (1) {
+		input_status = _getch();
+		if (input_status == 13) { //윗방향 또는 아래방향을 입력받았을 경우
+			select_ProductMain();
+		}
+	}
+}
+

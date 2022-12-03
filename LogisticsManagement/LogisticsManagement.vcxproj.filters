@@ -27,5 +27,8 @@
     <ClCompile Include="select_BranchAccount.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="searchStorageStock.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
