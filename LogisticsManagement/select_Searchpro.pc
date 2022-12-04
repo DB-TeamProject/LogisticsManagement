@@ -1,0 +1,146 @@
+//최초 작성자 : 20183109 강상혁 [2022-12-04]
+#define _CRT_SECURE_NO_WARNINGS
+//-----------------------------------------
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <conio.h>
+
+
+/* for oracle */
+#include <sqlda.h>
+#include <sqlca.h>
+#include <sqlcpr.h>
+/*------------*/
+
+
+/*---------------  화면 커서 위치 제어 ----------------------*/
+#include < windows.h >
+extern void gotoxy(int x, int y);
+extern void getxy(int* x, int* y);
+extern void clrscr(void);
+/*-----------------------------------------------------------*/
+
+extern void select_BranchMain();
+void select_SearchProduct();
+void select_ProMenu();
+void selet_allproduct();
+void select_pronum();
+void sql_error();
+
+EXEC SQL BEGIN DECLARE SECTION;
+VARCHAR uid[80];
+VARCHAR pwd[20];
+EXEC SQL END DECLARE SECTION;
+
+#define getch() _getch()
+
+
+void select_SearchProduct(){
+	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
+	DB_connect();
+	select_ProMenu();
+	EXEC SQL COMMIT WORK RELEASE;
+	getch();
+}
+
+void select_ProMenu(){
+	clrscr();
+	gotoxy(0,1);
+	print_screen("select_SearchProduct.txt");
+	int cursor_position = 10;
+	int input_status;
+	while(1){
+		gotoxy(60, cursor_position);
+		input_status = _getch();
+
+		if(input_status == 72 || input_status == 80){
+			if(input_status == 72){
+				if(cursor_position == 10){
+					cursor_position = 14;
+				}
+				else{
+					cursor_position -=2;
+				}
+			}
+			else if(input_status == 80){
+				if(cursor_position == 14){
+					cursor_position = 10;
+				}
+				else{
+					cursor_position += 2;
+				}
+			}
+		}
+		else if (input_status == 13){
+			clrscr();
+			if(cursor_position == 10){
+				selet_allproduct();
+			}
+			else if(cursor_position == 12){
+				select_pronum();
+			}
+			else if(cursor_position == 14){
+				select_BranchMain();
+			}
+			break;
+		}
+	}
+}
+
+void select_allproduct(){
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar officenumber[100];
+	varchar id[100];
+	varchar name[100];
+	varchar amount[100];
+	varchar price[100];
+
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+	clrscr();
+
+	print_screen("select_Allproduct.txt");
+
+	sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamout, p,price from branchstorage b join productinfo p on p.pid = b.pid");
+	
+	EXEC SQL PREPARE S FROM :dynstmt;
+
+	EXEC SQL DECLARE c_cursor CURSOR FOR S;
+
+	EXEC SQL OPEN c_cursor;
+	
+	gotoxy(20, 9);
+	printf("지사번호  | 상품코드  |이름           |수량      |개당 가격    ");
+	gotoxy(20, 10);
+	printf("----------------------------------------------");
+	int y = 11;
+	
+	EXEC SQL WHENEVER NOT FOUND DO break;
+
+	
+
+	for (;;){
+		EXEC SQL FETCH c_cursor INTO :officenumber, :id, :name, :amount, :price;
+
+		officenumber.arr[officenumber.len] = '\0';
+		id.arr[id.len] = '\0';
+		name.arr[name.len] = '\0';
+		amount.arr[amount.len] = '\0';
+		price.arr[price.len] = '\0';
+
+		gotoxy(20, y);
+		printf("%-10s|%-10s|%-15s|%-10s|%-10s",officenumber.arr, id.arr, name.arr, amount.arr, price.arr);
+		y++;
+	}
+}
+	
+	
+void select_pronum(){
+
+}
