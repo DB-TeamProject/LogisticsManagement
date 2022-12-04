@@ -135,10 +135,10 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,840,0,0,
-5,0,0,1,0,0,30,45,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,112,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,116,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,129,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+5,0,0,1,0,0,30,46,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,113,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,117,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,130,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
 };
 
 
@@ -168,9 +168,10 @@ extern void clrscr(void);
 /*-----------------------------------------------------------*/
 
 extern void select_BranchMain();
+
 void select_SearchProduct();
 void select_ProMenu();
-void selet_allproduct();
+void select_allproduct();
 void select_pronum();
 void sql_error();
 
@@ -244,7 +245,7 @@ void select_ProMenu(){
 		else if (input_status == 13){
 			clrscr();
 			if(cursor_position == 10){
-				selet_allproduct();
+				select_allproduct();
 			}
 			else if(cursor_position == 12){
 				select_pronum();
@@ -447,12 +448,12 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 		price.arr[price.len] = '\0';
 
 		gotoxy(20, y);
-		printf("%-10s|%-10s|%-15s|%-10s|%-10s",officenumber.arr, id.arr, name.arr, amount.arr, price.arr);
+		printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, amount.arr, price.arr);
 		y++;
 	}
 }
 	
 	
 void select_pronum(){
-
+	printf("1");
 }

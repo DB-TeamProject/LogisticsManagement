@@ -24,9 +24,10 @@ extern void clrscr(void);
 /*-----------------------------------------------------------*/
 
 extern void select_BranchMain();
+
 void select_SearchProduct();
 void select_ProMenu();
-void selet_allproduct();
+void select_allproduct();
 void select_pronum();
 void sql_error();
 
@@ -77,7 +78,7 @@ void select_ProMenu(){
 		else if (input_status == 13){
 			clrscr();
 			if(cursor_position == 10){
-				selet_allproduct();
+				select_allproduct();
 			}
 			else if(cursor_position == 12){
 				select_pronum();
@@ -135,12 +136,12 @@ void select_allproduct(){
 		price.arr[price.len] = '\0';
 
 		gotoxy(20, y);
-		printf("%-10s|%-10s|%-15s|%-10s|%-10s",officenumber.arr, id.arr, name.arr, amount.arr, price.arr);
+		printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, amount.arr, price.arr);
 		y++;
 	}
 }
 	
 	
 void select_pronum(){
-
+	printf("1");
 }
