@@ -24,7 +24,6 @@ extern void clrscr(void);
 /*-----------------------------------------------------------*/
 
 extern void select_BranchMain();
-
 void select_SearchProduct();
 void select_ProMenu();
 void select_allproduct();
@@ -92,56 +91,193 @@ void select_ProMenu(){
 }
 
 void select_allproduct(){
-	EXEC SQL BEGIN DECLARE SECTION;
-	varchar officenumber[100];
-	varchar id[100];
-	varchar name[100];
-	varchar amount[100];
-	varchar price[100];
+	int count = 0;
+	while(1){	
+		clrscr();
+		gotoxy(0,1);
+		print_screen("select_Allproduct.txt");
+		if(count == 1){
+			gotoxy(34, 15);
+			printf("입력한 정보가 올바르지 않습니다 다시 시도해 주세요.");
+			Sleep(1000);
+			gotoxy(34, 15);
+			printf("                                                           ");
+		}
+		count = 1;
+		EXEC SQL BEGIN DECLARE SECTION;
+		varchar officenumber[100];
+		varchar id[100];
+		varchar name[100];
+		varchar amount[100];
+		varchar price[100];
 
-	char dynstmt[1000];
-	EXEC SQL END DECLARE SECTION;
-
-	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
-
-	clrscr();
-
-	print_screen("select_Allproduct.txt");
-
-	sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamout, p,price from branchstorage b join productinfo p on p.pid = b.pid");
+		char dynstmt[1000];
+		EXEC SQL END DECLARE SECTION;
 	
-	EXEC SQL PREPARE S FROM :dynstmt;
+		char office[100];
+		char	pass[100];
 
-	EXEC SQL DECLARE c_cursor CURSOR FOR S;
+		EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
 
-	EXEC SQL OPEN c_cursor;
+		gotoxy(49,6);
+		gets(office);
+
+		gotoxy(49,7);
+		gets(pass);
+
+		sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamount, p.pprice from 	(branchstorage b join productinfo p  on p.pid = b.pid ) join account a on b.officenumber = 	a.officenumber and a.pw = '%s'and a.officenumber = '%s'", pass, office);
 	
-	gotoxy(20, 9);
-	printf("지사번호  | 상품코드  |이름           |수량      |개당 가격    ");
-	gotoxy(20, 10);
-	printf("----------------------------------------------");
-	int y = 11;
+		EXEC SQL PREPARE S FROM :dynstmt;
+
+		EXEC SQL DECLARE c_cursor CURSOR FOR S;
+
+		EXEC SQL OPEN c_cursor;
 	
-	EXEC SQL WHENEVER NOT FOUND DO break;
+		gotoxy(20, 9);
+		printf("지사번호  | 상품코드  |이름           |수량      |개당 가격    ");
+		gotoxy(20, 10);
+		printf("-----------------------------------------------------------");
+		int y = 11;
+	
+		EXEC SQL WHENEVER NOT FOUND DO break;
 
 	
 
-	for (;;){
-		EXEC SQL FETCH c_cursor INTO :officenumber, :id, :name, :amount, :price;
+		for (;;){
+			EXEC SQL FETCH c_cursor INTO :officenumber, :id, :name, :amount, :price;
 
-		officenumber.arr[officenumber.len] = '\0';
-		id.arr[id.len] = '\0';
-		name.arr[name.len] = '\0';
-		amount.arr[amount.len] = '\0';
-		price.arr[price.len] = '\0';
-
-		gotoxy(20, y);
-		printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, amount.arr, price.arr);
-		y++;
+			officenumber.arr[officenumber.len] = '\0';
+			id.arr[id.len] = '\0';
+			name.arr[name.len] = '\0';
+			amount.arr[amount.len] = '\0';
+			price.arr[price.len] = '\0';
+			if (officenumber.arr != NULL) {
+				gotoxy(20, y);
+				printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, 	amount.arr, price.arr);
+				y++;
+				count = 0;
+				gotoxy(55,25);
+				int input_status = _getch();
+				if (input_status == 13){
+					select_ProMenu();
+				}
+				break;
+			}
+		
+		}
 	}
+	EXEC SQL CLOSE c_cursor;
 }
 	
 	
 void select_pronum(){
-	printf("1");
+	int count = 0;
+	while(1){	
+		clrscr();
+		gotoxy(0,1);
+		print_screen("select_productnum.txt");
+		if(count == 1){
+			gotoxy(34, 15);
+			printf("입력한 정보가 올바르지 않습니다 다시 시도해 주세요.");
+			Sleep(1000);
+			gotoxy(34, 15);
+			printf("                                                           ");
+		}
+		count = 1;
+		EXEC SQL BEGIN DECLARE SECTION;
+		varchar officenumber[100];
+		varchar id[100];
+		varchar name[100];
+		varchar amount[100];
+		varchar price[100];
+
+		char dynstmt[1000];
+		EXEC SQL END DECLARE SECTION;
+	
+		char office[100];
+		char	pass[100];
+		char pronum[100];
+
+		EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+		gotoxy(48,6);
+		gets(office);
+
+		gotoxy(48,7);
+		gets(pass);
+		
+		gotoxy(48,8);
+		gets(pronum);
+
+		sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamount, p.pprice from 	(branchstorage b join productinfo p  on p.pid = b.pid ) join account a on b.officenumber = 	a.officenumber and a.pw = '%s'and a.officenumber = '%s' and b.pid = '%s' ", pass, office, pronum);
+	
+		EXEC SQL PREPARE S FROM :dynstmt;
+
+		EXEC SQL DECLARE c_cursor2 CURSOR FOR S;
+
+		EXEC SQL OPEN c_cursor2;
+	
+		gotoxy(20, 9);
+		printf("지사번호  | 상품코드  |이름           |수량      |개당 가격    ");
+		gotoxy(20, 10);
+		printf("-----------------------------------------------------------");
+		int y = 11;
+	
+		EXEC SQL WHENEVER NOT FOUND DO break;
+
+	
+
+		for (;;){
+			EXEC SQL FETCH c_cursor2 INTO :officenumber, :id, :name, :amount, :price;
+
+			officenumber.arr[officenumber.len] = '\0';
+			id.arr[id.len] = '\0';
+			name.arr[name.len] = '\0';
+			amount.arr[amount.len] = '\0';
+			price.arr[price.len] = '\0';
+			if (officenumber.arr != NULL) {
+				gotoxy(20, y);
+				printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, 	amount.arr, price.arr);
+				y++;
+				count = 0;
+				break;
+
+			}						
+		}
+		break;
+	}
+	int cursor_position = 24;
+	int input_status;
+	while(1){
+		gotoxy(55, cursor_position);
+		input_status = _getch();
+		
+		if(input_status == 72 || input_status == 80){
+			if(input_status == 72){
+				if(cursor_position == 24){
+					cursor_position = 26;
+				}else{
+					cursor_position -= 2;
+				}
+			}
+			else if(input_status == 80){
+				if(cursor_position == 26){
+					cursor_position = 24;
+				}
+				else{
+					cursor_position += 2;
+				}
+			}
+		}		
+		else if (input_status == 13){
+			clrscr();
+			if(cursor_position == 24){
+				select_pronum();
+			}
+			else if(cursor_position == 26){
+				select_ProMenu();
+			}
+			break;		
+		}		
+	}
 }
