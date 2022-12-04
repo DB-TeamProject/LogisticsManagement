@@ -134,10 +134,10 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
-{13,4130,1,0,0,
-5,0,0,1,0,0,30,53,0,0,0,0,0,1,0,
-20,0,0,0,0,0,27,63,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
-51,0,0,3,0,0,31,254,0,0,0,0,0,1,0,
+{13,4130,840,0,0,
+5,0,0,1,0,0,30,54,0,0,0,0,0,1,0,
+20,0,0,0,0,0,27,64,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
+51,0,0,3,0,0,31,256,0,0,0,0,0,1,0,
 };
 
 
@@ -161,6 +161,7 @@ extern void login();
 extern void addStorage();
 extern void select_BranchAccount();
 extern void searchStorageStock();
+extern void select_SearchProduct();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -198,7 +199,7 @@ void main()
 
 	DB_connect();
 	login();
-	select_HeadMain();
+	//select_HeadMain();
 	/* EXEC SQL COMMIT WORK RELEASE; */ 
 
 {
@@ -364,6 +365,7 @@ void select_BranchMain() {
 		else if (input_status == 13) { // 엔터키를 입력받았을 경우
 			clrscr();
 			if (cursor_position == 10) { //첫번째 행
+				select_SearchProduct();
 			}
 			else if (cursor_position == 12) {//두번째 행
 			}

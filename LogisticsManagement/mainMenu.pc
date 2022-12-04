@@ -50,7 +50,7 @@ void main()
 
 	DB_connect();
 	login();
-	select_HeadMain();
+	//select_HeadMain();
 	EXEC SQL COMMIT WORK RELEASE;
 	getch();
 }
