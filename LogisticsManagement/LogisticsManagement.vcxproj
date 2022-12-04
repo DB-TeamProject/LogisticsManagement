@@ -20,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="accountMgmt.c" />
+    <ClCompile Include="addBranchAccount.c" />
     <ClCompile Include="addStorage.c" />
     <ClCompile Include="mainMenu.c" />
     <ClCompile Include="searchStorageStock.c" />
     <ClCompile Include="select_BranchAccount.c" />
+    <ClCompile Include="select_Searchpro.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

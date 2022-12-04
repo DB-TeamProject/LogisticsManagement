@@ -1,0 +1,167 @@
+// 최초작성자: 20183215 정현수 [2022.12.02]
+#define _CRT_SECURE_NO_WARNINGS
+#define PAGE_NUM 5
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <conio.h>
+
+/* for oracle */
+#include <sqlda.h>
+#include <sqlca.h>
+#include <sqlcpr.h>
+
+
+// win32 Visual C 2010 이상컴파일시 추가
+#define getch() _getch()
+//-----------------------------------------
+
+extern void select_HeadAccountMain();
+
+/*---------------  화면 커서 위치 제어 ----------------------*/
+#include < windows.h >
+void gotoxy(int x, int y);
+void getxy(int* x, int* y);
+void clrscr(void);
+/*-----------------------------------------------------------*/
+void addBranchAccount();
+void input_Account();
+void insert_id();
+void last_officenumber();
+void sql_error();
+
+char input_id[100];
+char input_pw[100];
+char last_officenum[100];
+int check = 0;
+
+EXEC SQL BEGIN DECLARE SECTION;
+VARCHAR uid[80];
+VARCHAR pwd[20];
+EXEC SQL END DECLARE SECTION;
+
+#define getch() _getch()
+
+void addBranchAccount()
+{
+	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
+	DB_connect();
+	last_officenumber();
+	input_Account();
+	insert_id();
+	EXEC SQL COMMIT WORK RELEASE;
+	getch();
+}
+
+
+void input_Account()
+{
+	clrscr();
+	gotoxy(0, 1);
+	int input_status;
+	print_screen("addBranchAccount.txt");
+
+	/* 사용자 입력 */
+	gotoxy(43, 7);
+	gets(input_id); // 아이디 입력
+
+	gotoxy(43, 9);
+	gets(input_pw); // 비밀번호 입력
+
+	int cursor_position = 13;
+
+
+	while (1) {
+		gotoxy(47, cursor_position);
+		input_status = _getch();
+		if (input_status == 72) { // 방향키↑를 입력받았을 경우
+			if (cursor_position == 13) { // 커서가 첫번째 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+				cursor_position = 14;
+			}
+			else {
+				cursor_position -= 1;
+			}
+		}
+		else if (input_status == 80) {// 방향키↓를 입력받았을 경우
+			if (cursor_position == 14) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+				cursor_position = 13;
+			}
+			else {
+				cursor_position += 1;
+			}
+		}
+		else if (input_status == 13) { // 엔터키를 입력받았을 경우
+			if (cursor_position == 13) { //첫번째 행
+				check = 0;
+			}
+			else if (cursor_position == 14) {//두번째 행
+				gotoxy(38, 11);
+				printf("취소되었습니다. 이전 화면으로 이동합니다.");
+				Sleep(1500);
+				select_HeadAccountMain();
+			}
+			break;
+		}
+	}
+}
+
+	
+void last_officenumber()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar officenumber[100];
+
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	/* Register sql_error() as the error handler. */
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+	/* 실행시킬 SQL 문장*/
+	sprintf(dynstmt, "SELECT officenumber FROM (SELECT * FROM account ORDER BY officenumber DESC) WHERE ROWNUM = 1");
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE c_cursor3 CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN c_cursor3;
+
+	for (;;) {
+		EXEC SQL FETCH c_cursor3 INTO : officenumber;
+		officenumber.arr[officenumber.len] = '\0';
+		strcpy(last_officenum, officenumber.arr);
+		break;
+	}
+	EXEC SQL CLOSE c_cursor3;
+}
+
+void insert_id()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+
+	int i = atoi(last_officenum) +1;
+	char result[100];
+	snprintf(result, 10, "%d", i);
+
+
+	sprintf(dynstmt, "insert into account values ( '%s', '%s', '%s')", result, input_id, input_pw);
+
+	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
+
+	EXEC SQL COMMIT WORK;
+
+	gotoxy(38, 11);
+	printf("계정이 추가되었습니다");
+	Sleep(1500);
+	check = 0;
+	addBranchAccount();
+}
