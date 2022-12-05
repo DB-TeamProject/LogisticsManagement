@@ -135,13 +135,17 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,54,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,125,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,131,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,134,0,0,1,0,0,1,0,2,9,0,0,
-73,0,0,2,0,0,15,139,0,0,0,0,0,1,0,
-88,0,0,3,0,0,24,158,0,0,1,1,0,1,0,1,97,0,0,
-107,0,0,4,0,0,29,160,0,0,0,0,0,1,0,
+5,0,0,1,0,0,30,56,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,131,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,137,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,140,0,0,1,0,0,1,0,2,9,0,0,
+73,0,0,2,0,0,15,145,0,0,0,0,0,1,0,
+88,0,0,2,0,0,17,161,0,0,1,1,0,1,0,1,97,0,0,
+107,0,0,2,0,0,45,165,0,0,0,0,0,1,0,
+122,0,0,2,0,0,13,169,0,0,1,0,0,1,0,2,9,0,0,
+141,0,0,2,0,0,15,183,0,0,0,0,0,1,0,
+156,0,0,3,0,0,24,202,0,0,1,1,0,1,0,1,97,0,0,
+175,0,0,4,0,0,29,204,0,0,0,0,0,1,0,
 };
 
 
@@ -177,12 +181,13 @@ void addBranchAccount();
 void input_Account();
 void insert_id();
 void last_officenumber();
+void checkID();
 void sql_error();
 
 char input_id[100];
 char input_pw[100];
 char last_officenum[100];
-int check = 0;
+
 
 /* EXEC SQL BEGIN DECLARE SECTION; */ 
 
@@ -203,6 +208,7 @@ void addBranchAccount()
 	DB_connect();
 	last_officenumber();
 	input_Account();
+	checkID();
 	insert_id();
 	/* EXEC SQL COMMIT WORK RELEASE; */ 
 
@@ -242,42 +248,46 @@ void input_Account()
 
 	int cursor_position = 13;
 
-
-	while (1) {
-		gotoxy(47, cursor_position);
-		input_status = _getch();
-		if (input_status == 72) { // 방향키↑를 입력받았을 경우
-			if (cursor_position == 13) { // 커서가 첫번째 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
-				cursor_position = 14;
+	if (strlen(input_id) <= 0 || strlen(input_pw) <= 0) {
+		gotoxy(38, 11);
+		printf("입력하지 않은 항목이 있습니다 다시 시도해주세요,\n");
+		Sleep(1000);
+		addBranchAccount();
+	}
+	else {
+		while (1) {
+			gotoxy(47, cursor_position);
+			input_status = _getch();
+			if (input_status == 72) { // 방향키↑를 입력받았을 경우
+				if (cursor_position == 13) { // 커서가 첫번째 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+					cursor_position = 14;
+				}
+				else {
+					cursor_position -= 1;
+				}
 			}
-			else {
-				cursor_position -= 1;
+			else if (input_status == 80) {// 방향키↓를 입력받았을 경우
+				if (cursor_position == 14) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+					cursor_position = 13;
+				}
+				else {
+					cursor_position += 1;
+				}
 			}
-		}
-		else if (input_status == 80) {// 방향키↓를 입력받았을 경우
-			if (cursor_position == 14) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
-				cursor_position = 13;
+			else if (input_status == 13) { // 엔터키를 입력받았을 경우
+				if (cursor_position == 14) {//두번째 행
+					gotoxy(38, 11);
+					printf("취소되었습니다. 이전 화면으로 이동합니다.");
+					Sleep(1500);
+					select_HeadAccountMain();
+				}
+				break;
 			}
-			else {
-				cursor_position += 1;
-			}
-		}
-		else if (input_status == 13) { // 엔터키를 입력받았을 경우
-			if (cursor_position == 13) { //첫번째 행
-				check = 0;
-			}
-			else if (cursor_position == 14) {//두번째 행
-				gotoxy(38, 11);
-				printf("취소되었습니다. 이전 화면으로 이동합니다.");
-				Sleep(1500);
-				select_HeadAccountMain();
-			}
-			break;
 		}
 	}
 }
 
-	
+
 void last_officenumber()
 {
 	/* EXEC SQL BEGIN DECLARE SECTION; */ 
@@ -430,6 +440,165 @@ struct { unsigned short len; unsigned char arr[100]; } officenumber;
 
 }
 
+void checkID()
+{
+	/* EXEC SQL BEGIN DECLARE SECTION; */ 
+
+	/* varchar check_id[100]; */ 
+struct { unsigned short len; unsigned char arr[100]; } check_id;
+
+
+	char dynstmt1[1000];
+	/* EXEC SQL END DECLARE SECTION; */ 
+
+
+	/* Register sql_error() as the error handler. */
+	/* EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n"); */ 
+
+
+	sprintf(dynstmt1, "SELECT id FROM account where id = '%s' ", input_id);
+
+	/* EXEC SQL PREPARE S FROM : dynstmt1; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 1;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )88;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqhstv[0] = (         void  *)dynstmt1;
+ sqlstm.sqhstl[0] = (unsigned int  )1000;
+ sqlstm.sqhsts[0] = (         int  )0;
+ sqlstm.sqindv[0] = (         void  *)0;
+ sqlstm.sqinds[0] = (         int  )0;
+ sqlstm.sqharm[0] = (unsigned int  )0;
+ sqlstm.sqadto[0] = (unsigned short )0;
+ sqlstm.sqtdso[0] = (unsigned short )0;
+ sqlstm.sqphsv = sqlstm.sqhstv;
+ sqlstm.sqphsl = sqlstm.sqhstl;
+ sqlstm.sqphss = sqlstm.sqhsts;
+ sqlstm.sqpind = sqlstm.sqindv;
+ sqlstm.sqpins = sqlstm.sqinds;
+ sqlstm.sqparm = sqlstm.sqharm;
+ sqlstm.sqparc = sqlstm.sqharc;
+ sqlstm.sqpadto = sqlstm.sqadto;
+ sqlstm.sqptdso = sqlstm.sqtdso;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	/* EXEC SQL DECLARE c_cursor6 CURSOR FOR S; */ 
+
+
+	/* EXEC SQL OPEN c_cursor6; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 1;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.stmt = "";
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )107;
+ sqlstm.selerr = (unsigned short)1;
+ sqlstm.sqlpfmem = (unsigned int  )0;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlstm.sqcmod = (unsigned int )0;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+
+	for (;;)
+	{
+		/* EXEC SQL FETCH c_cursor6 INTO : check_id; */ 
+
+{
+  struct sqlexd sqlstm;
+  sqlstm.sqlvsn = 13;
+  sqlstm.arrsiz = 1;
+  sqlstm.sqladtp = &sqladt;
+  sqlstm.sqltdsp = &sqltds;
+  sqlstm.iters = (unsigned int  )1;
+  sqlstm.offset = (unsigned int  )122;
+  sqlstm.selerr = (unsigned short)1;
+  sqlstm.sqlpfmem = (unsigned int  )0;
+  sqlstm.cud = sqlcud0;
+  sqlstm.sqlest = (unsigned char  *)&sqlca;
+  sqlstm.sqlety = (unsigned short)4352;
+  sqlstm.occurs = (unsigned int  )0;
+  sqlstm.sqfoff = (           int )0;
+  sqlstm.sqfmod = (unsigned int )2;
+  sqlstm.sqhstv[0] = (         void  *)&check_id;
+  sqlstm.sqhstl[0] = (unsigned int  )102;
+  sqlstm.sqhsts[0] = (         int  )0;
+  sqlstm.sqindv[0] = (         void  *)0;
+  sqlstm.sqinds[0] = (         int  )0;
+  sqlstm.sqharm[0] = (unsigned int  )0;
+  sqlstm.sqadto[0] = (unsigned short )0;
+  sqlstm.sqtdso[0] = (unsigned short )0;
+  sqlstm.sqphsv = sqlstm.sqhstv;
+  sqlstm.sqphsl = sqlstm.sqhstl;
+  sqlstm.sqphss = sqlstm.sqhsts;
+  sqlstm.sqpind = sqlstm.sqindv;
+  sqlstm.sqpins = sqlstm.sqinds;
+  sqlstm.sqparm = sqlstm.sqharm;
+  sqlstm.sqparc = sqlstm.sqharc;
+  sqlstm.sqpadto = sqlstm.sqadto;
+  sqlstm.sqptdso = sqlstm.sqtdso;
+  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+		if (sqlca.sqlcode == 1403) break;
+
+		check_id.arr[check_id.len] = '\0';
+
+		if (check_id.arr != NULL) {
+			gotoxy(38, 11);
+			printf("이미 존재하는 ID 입니다.");
+			Sleep(1500);
+			addBranchAccount();
+		}
+		break;
+	}
+	/* Close the cursor. */
+	/* EXEC SQL CLOSE c_cursor6; */ 
+
+{
+ struct sqlexd sqlstm;
+ sqlstm.sqlvsn = 13;
+ sqlstm.arrsiz = 1;
+ sqlstm.sqladtp = &sqladt;
+ sqlstm.sqltdsp = &sqltds;
+ sqlstm.iters = (unsigned int  )1;
+ sqlstm.offset = (unsigned int  )141;
+ sqlstm.cud = sqlcud0;
+ sqlstm.sqlest = (unsigned char  *)&sqlca;
+ sqlstm.sqlety = (unsigned short)4352;
+ sqlstm.occurs = (unsigned int  )0;
+ sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
+ if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
+}
+
+
+}
+
 void insert_id()
 {
 	/* EXEC SQL BEGIN DECLARE SECTION; */ 
@@ -442,7 +611,7 @@ void insert_id()
 
 
 
-	int i = atoi(last_officenum) +1;
+	int i = atoi(last_officenum) + 1;
 	char result[100];
 	snprintf(result, 10, "%d", i);
 
@@ -459,7 +628,7 @@ void insert_id()
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )88;
+ sqlstm.offset = (unsigned int  )156;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -496,7 +665,7 @@ void insert_id()
  sqlstm.sqladtp = &sqladt;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )107;
+ sqlstm.offset = (unsigned int  )175;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -510,6 +679,5 @@ void insert_id()
 	gotoxy(38, 11);
 	printf("계정이 추가되었습니다");
 	Sleep(1500);
-	check = 0;
 	addBranchAccount();
 }
