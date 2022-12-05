@@ -20,6 +20,7 @@ extern void select_BranchAccount();
 extern void searchStorageStock();
 extern void select_SearchProduct();
 extern void addBranchAccount();
+extern void deleteBranchAccount();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -252,6 +253,7 @@ void select_HeadAccountMain() {
 				addBranchAccount();
 			}
 			else if (cursor_position == 12) {//두번째 행
+				deleteBranchAccount();
 			}
 			else if (cursor_position == 14) {//세번째 행
 				select_HeadMain();

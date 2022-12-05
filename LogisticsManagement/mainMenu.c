@@ -135,9 +135,9 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,56,0,0,0,0,0,1,0,
-20,0,0,0,0,0,27,66,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
-51,0,0,3,0,0,31,303,0,0,0,0,0,1,0,
+5,0,0,1,0,0,30,57,0,0,0,0,0,1,0,
+20,0,0,0,0,0,27,67,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
+51,0,0,3,0,0,31,305,0,0,0,0,0,1,0,
 };
 
 
@@ -163,6 +163,7 @@ extern void select_BranchAccount();
 extern void searchStorageStock();
 extern void select_SearchProduct();
 extern void addBranchAccount();
+extern void deleteBranchAccount();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -465,6 +466,7 @@ void select_HeadAccountMain() {
 				addBranchAccount();
 			}
 			else if (cursor_position == 12) {//두번째 행
+				deleteBranchAccount();
 			}
 			else if (cursor_position == 14) {//세번째 행
 				select_HeadMain();
