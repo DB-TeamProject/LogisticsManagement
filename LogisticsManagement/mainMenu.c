@@ -135,9 +135,9 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,59,0,0,0,0,0,1,0,
-20,0,0,0,0,0,27,69,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
-51,0,0,3,0,0,31,307,0,0,0,0,0,1,0,
+5,0,0,1,0,0,30,60,0,0,0,0,0,1,0,
+20,0,0,0,0,0,27,70,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
+51,0,0,3,0,0,31,309,0,0,0,0,0,1,0,
 };
 
 
@@ -165,6 +165,7 @@ extern void select_SearchProduct();
 extern void addBranchAccount();
 extern void deleteBranchAccount();
 extern void Branch();
+extern void manageIn();
 //extern void managewarehouse();
 
 // win32 Visual C 2010 이상컴파일시 추가
@@ -328,6 +329,7 @@ void select_HeadMain() {
 				//managewarehouse();
 			}
 			else if (cursor_position == 14) {//세번째 행
+				manageIn();
 			}
 			else if (cursor_position == 16) {//네번째 행
 				select_HeadAccountMain();
@@ -361,7 +363,7 @@ void select_BranchMain() {
 				}
 			}
 			else if (input_status == 80) {// 방향키↓를 입력받았을 경우
-				if (cursor_position == 16) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+				if (cursor_position == 16) { // 커서가 마지막 행에 있고, 아래방향키를 입력받았을 경우 첫 행으로 감
 					cursor_position = 10;
 				}
 				else {
@@ -409,7 +411,7 @@ void select_ProductMain() {
 				}
 			}
 			else if (input_status == 80) {// 방향키↓를 입력받았을 경우
-				if (cursor_position == 14) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+				if (cursor_position == 14) { // 커서가 마지막 행에 있고, 아래방향키를 입력받았을 경우 첫 행으로 감
 					cursor_position = 10;
 				}
 				else {

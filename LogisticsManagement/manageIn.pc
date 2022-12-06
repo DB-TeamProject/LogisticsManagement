@@ -1,0 +1,396 @@
+//최초작성자: 20183215 정현수 [2022.12.07]
+#define _CRT_SECURE_NO_WARNINGS
+#define PAGE_NUM 5
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <conio.h>
+
+/* for oracle */
+#include <sqlda.h>
+#include <sqlca.h>
+#include <sqlcpr.h>
+
+
+//win32 Visual C 2010 이상컴파일시 추가
+#define getch() _getch()
+/*-----------------------------------------*/
+void manageIn();
+void get_InTuple();
+void receive_num();
+void check_ordernum();
+void no_receive();
+void checking_pid();
+void insert_pidd();
+void update_storages();
+void update_branchStorage();
+void select_nBranchStoragePamount();
+void select_nStoragePamount();
+/*---------------  화면 커서 위치 제어 ----------------------*/
+#include < windows.h >
+void gotoxy(int x, int y);
+void getxy(int* x, int* y);
+void clrscr(void);
+/*-----------------------------------------------------------*/
+char order_num[100];
+char order_pid[100];
+char order_officenumber[100];
+char order_amount[100];
+char now_storagePamount[100];
+char now_branchStoragePamount[100];
+void sql_error();
+
+
+extern void select_HeadMain();
+
+EXEC SQL BEGIN DECLARE SECTION;
+VARCHAR uid[80];
+VARCHAR pwd[20];
+EXEC SQL END DECLARE SECTION;
+
+#define getch() _getch()
+
+void manageIn()
+{
+	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
+	DB_connect();
+	get_InTuple();
+	receive_num();
+	
+	EXEC SQL COMMIT WORK RELEASE;
+	getch();
+}
+
+void get_InTuple()
+{
+	clrscr();
+	gotoxy(0, 1);
+	print_screen("manageIn.txt");
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar ordernumber[100];
+	varchar type[100];
+	varchar officenumber[100];
+	varchar pid[100];
+	varchar orderamount[100];
+	varchar pdate[100];
+
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+
+	/* Register sql_error() as the error handler. */
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+
+	/* 실행시킬 SQL 문장*/
+	sprintf(dynstmt, "SELECT ordernumber, type, officenumber, pid, orderamount, pdate FROM warehousing WHERE type = '출고' ORDER BY ordernumber ASC");
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE c_cursor CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN c_cursor;
+	gotoxy(20, 15);
+	printf("주문번호  |유형     |지점번호  |아이디   |주문량    |날짜    ");
+	gotoxy(20, 16);
+	printf("----------------------------------------------");
+	int y = 17;
+
+	for (;;)
+	{
+
+		EXEC SQL FETCH c_cursor INTO : ordernumber, : type, : officenumber, : pid, : orderamount, : pdate;
+		if (sqlca.sqlcode == 1403) break;
+
+		ordernumber.arr[ordernumber.len] = '\0';
+		type.arr[type.len] = '\0';
+		officenumber.arr[officenumber.len] = '\0';
+		pid.arr[pid.len] = '\0';
+		orderamount.arr[orderamount.len] = '\0';
+		pdate.arr[pdate.len] = '\0';
+
+		gotoxy(20, y);
+		printf(" %-10s|%-10s|%-10s|%-10s|%-10s|%-10s", ordernumber.arr, type.arr, officenumber.arr, pid.arr, orderamount.arr, pdate.arr);
+		y++;
+	}
+	/* Close the cursor. */
+	EXEC SQL CLOSE c_cursor;
+}
+
+void receive_num() {
+	int input_status;
+
+	gotoxy(48, 7);
+	gets(order_num);// 전역변수에 저장
+
+	int cursor_position = 9;
+
+	if (strlen(order_num) <= 0) {
+		gotoxy(38, 8);
+		printf("입력하지 않은 항목이 있습니다 다시 시도해주세요,\n");
+		Sleep(1000);
+		manageIn();
+	}
+	else {
+		while (1) {
+			gotoxy(45, cursor_position);
+			input_status = _getch();
+			if (input_status == 72) { // 방향키↑를 입력받았을 경우
+				if (cursor_position == 9) { // 커서가 첫번째 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+					cursor_position = 11;
+				}
+				else {
+					cursor_position -= 1;
+				}
+			}
+			else if (input_status == 80) {// 방향키↓를 입력받았을 경우
+				if (cursor_position == 11) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+					cursor_position = 9;
+				}
+				else {
+					cursor_position += 1;
+				}
+			}
+			else if (input_status == 13) { // 엔터키를 입력받았을 경우
+				if (cursor_position == 9) {//첫번째 행
+					check_ordernum();
+					checking_pid();
+					select_nBranchStoragePamount();
+					select_nStoragePamount();
+					update_storages();
+					update_branchStorage();
+					no_receive();
+				}
+				else if (cursor_position == 10) {//두번째 행
+					check_ordernum();
+					no_receive();
+				}
+				else {
+					select_HeadMain();
+				}
+				break;
+			}
+		}
+	}
+}
+
+void check_ordernum()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar check_ordernum[100];
+	varchar check_officenumber[100];
+	varchar check_pid[100];
+	varchar check_orderamount[100];
+	char dynstmt1[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	/* Register sql_error() as the error handler. */
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+	sprintf(dynstmt1, "SELECT ordernumber, officenumber, pid, orderamount FROM warehousing where ordernumber = '%s' and type ='출고'", order_num);
+
+	EXEC SQL PREPARE S FROM : dynstmt1;
+
+	EXEC SQL DECLARE c_cursor6 CURSOR FOR S;
+
+	EXEC SQL OPEN c_cursor6;
+
+	for (;;)
+	{
+		EXEC SQL FETCH c_cursor6 INTO : check_ordernum, : check_officenumber, : check_pid, : check_orderamount;
+		if (sqlca.sqlcode == 1403) break;
+
+		check_ordernum.arr[check_ordernum.len] = '\0';
+		check_officenumber.arr[check_officenumber.len] = '\0';
+		check_pid.arr[check_pid.len] = '\0';
+		check_orderamount.arr[check_orderamount.len] = '\0';
+
+		if (check_ordernum.arr != NULL) {
+			strcpy(order_officenumber, check_officenumber.arr);
+			strcpy(order_pid, check_pid.arr);
+			strcpy(order_amount, check_orderamount.arr);
+			return;
+		}
+		break;
+	}
+	/* Close the cursor. */
+	EXEC SQL CLOSE c_cursor6;
+	gotoxy(38, 8);
+	printf("존재하지 않는 주문번호 입니다.");
+	Sleep(1500);
+	manageIn();
+}
+
+void no_receive()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+
+	char dynstmt[1000];
+
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+	sprintf(dynstmt, "delete from warehousing where ordernumber = '%s' ", order_num);
+	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
+
+	EXEC SQL COMMIT WORK;
+
+	gotoxy(42, 8);
+	printf("완료되었습니다.");
+	Sleep(1500);
+	manageIn();
+}
+
+void checking_pid()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar check_pid[100];
+
+	char dynstmt1[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	/* Register sql_error() as the error handler. */
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+	sprintf(dynstmt1, "SELECT pid FROM branchstorage where pid = '%s' and officenumber = '%s' ", order_pid, order_officenumber);
+
+	EXEC SQL PREPARE S FROM : dynstmt1;
+
+	EXEC SQL DECLARE c_cursor8 CURSOR FOR S;
+
+	EXEC SQL OPEN c_cursor8;
+
+	for (;;)
+	{
+		EXEC SQL FETCH c_cursor8 INTO : check_pid;
+		if (sqlca.sqlcode == 1403) break;
+		check_pid.arr[check_pid.len] = '\0';
+
+		if (check_pid.arr != NULL) {
+			return;
+		}
+		break;
+	}
+	/* Close the cursor. */
+	EXEC SQL CLOSE c_cursor8;
+	insert_pidd();
+
+}
+
+void insert_pidd()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+
+	sprintf(dynstmt, "insert into branchstorage values ('%s', '%s', '0')", order_pid, order_officenumber);
+
+	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
+
+	EXEC SQL COMMIT WORK;
+}
+
+void update_storages() 
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+
+	int i = atoi(now_storagePamount) + atoi(order_amount);
+	char result[100];
+	snprintf(result, 10, "%d", i);
+
+
+	sprintf(dynstmt, "update storage set pamount = '%s' where pid = '%s'", result, order_pid);
+
+	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
+
+	EXEC SQL COMMIT WORK;
+}
+void update_branchStorage() {
+	EXEC SQL BEGIN DECLARE SECTION;
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+
+	int i = atoi(now_branchStoragePamount) - atoi(order_amount);
+	char result[100];
+	snprintf(result, 10, "%d", i);
+
+
+	sprintf(dynstmt, "update branchstorage set pamount = '%s' where pid = '%s'", result, order_pid);
+
+	EXEC SQL EXECUTE IMMEDIATE : dynstmt;
+
+	EXEC SQL COMMIT WORK;
+}
+
+void select_nStoragePamount() {
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar v_pamount[100];
+	char dynstmt[1000];
+
+	EXEC SQL END DECLARE SECTION;
+
+
+	sprintf(dynstmt, "SELECT pamount FROM storage where pid = '%s'", order_pid);
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE c_cursor9 CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN c_cursor9;
+
+	for (;;)
+	{
+		if (sqlca.sqlcode == 1403) break;
+		EXEC SQL FETCH c_cursor9 INTO : v_pamount;
+
+		v_pamount.arr[v_pamount.len] = '\0';
+		strcpy(now_storagePamount, v_pamount.arr);
+	}
+}
+
+void select_nBranchStoragePamount() {
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar v_pamount[100];
+	char dynstmt[1000];
+
+	EXEC SQL END DECLARE SECTION;
+
+
+	sprintf(dynstmt, "SELECT pamount FROM branchstorage where pid = '%s'", order_pid);
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE c_cursor10 CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN c_cursor10;
+
+	for (;;)
+	{
+		if (sqlca.sqlcode == 1403) break;
+		EXEC SQL FETCH c_cursor10 INTO : v_pamount;
+
+		v_pamount.arr[v_pamount.len] = '\0';
+		strcpy(now_branchStoragePamount, v_pamount.arr);
+	}
+}

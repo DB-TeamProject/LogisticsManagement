@@ -25,6 +25,7 @@
     <ClCompile Include="Branchrequest.c" />
     <ClCompile Include="deleteBranchAccount.c" />
     <ClCompile Include="mainMenu.c" />
+    <ClCompile Include="manageIn.c" />
     <ClCompile Include="searchStorageStock.c" />
     <ClCompile Include="select_BranchAccount.c" />
     <ClCompile Include="select_Searchpro.c" />
