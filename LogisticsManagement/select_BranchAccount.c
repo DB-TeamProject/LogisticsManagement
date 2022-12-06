@@ -140,9 +140,9 @@ static const short sqlcud0[] =
 39,0,0,3,0,0,29,213,0,0,0,0,0,1,0,
 54,0,0,4,0,0,24,241,0,0,1,1,0,1,0,1,97,0,0,
 73,0,0,5,0,0,29,243,0,0,0,0,0,1,0,
-88,0,0,6,0,0,17,301,0,0,1,1,0,1,0,1,97,0,0,
-107,0,0,6,0,0,45,307,0,0,0,0,0,1,0,
-122,0,0,6,0,0,13,312,0,0,2,0,0,1,0,2,9,0,0,2,9,0,0,
+88,0,0,6,0,0,17,300,0,0,1,1,0,1,0,1,97,0,0,
+107,0,0,6,0,0,45,306,0,0,0,0,0,1,0,
+122,0,0,6,0,0,13,311,0,0,2,0,0,1,0,2,9,0,0,2,9,0,0,
 145,0,0,6,0,0,17,380,0,0,1,1,0,1,0,1,97,0,0,
 164,0,0,6,0,0,45,386,0,0,0,0,0,1,0,
 179,0,0,6,0,0,13,391,0,0,2,0,0,1,0,2,9,0,0,2,9,0,0,
@@ -335,7 +335,7 @@ void select_ModPass(){ //PASSWORD 변경선택 함수
 					cursor_position = 18;
 				}
 				else {
-					cursor_position -= 1;
+					cursor_position = 7;
 				}
 			}
 			else if (input_status == 80) {// 방향키↓를 입력받았을 경우
@@ -343,7 +343,7 @@ void select_ModPass(){ //PASSWORD 변경선택 함수
 					cursor_position = 7;
 				}
 				else {
-					cursor_position += 1;
+					cursor_position = 18;
 				}
 			}
 		}
@@ -570,7 +570,6 @@ struct { unsigned short len; unsigned char arr[100]; } id;
 		gotoxy(44, 7);
 		printf("%s",global_officenumber);
 		strcpy(no_temp1,global_officenumber);
-		//gets(no_temp1); //지사번호 입력
 		
 		
 		gotoxy(44, 9);
@@ -767,7 +766,8 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 		
 		/* 사용자 입력 */
 		gotoxy(44, 7);
-		gets(no_temp1); //지사번호 입력
+		printf("%s",global_officenumber);
+		strcpy(no_temp1,global_officenumber);
 		
 		gotoxy(44, 9);
 		gets(no_temp2); // 현재 패스워드 입력

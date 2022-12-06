@@ -22,7 +22,7 @@ extern void select_SearchProduct();
 extern void addBranchAccount();
 extern void deleteBranchAccount();
 extern void Branch();
-extern void managewarehouse();
+//extern void managewarehouse();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -112,7 +112,7 @@ void select_HeadMain() {
 				select_ProductMain();
 			}
 			else if (cursor_position == 12) {//두번째 행
-				managewarehouse();
+				//managewarehouse();
 			}
 			else if (cursor_position == 14) {//세번째 행
 			}
