@@ -214,7 +214,7 @@ void main()
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 
 	DB_connect();
-	Insert_tuple();
+	branchrequest();
 	/* EXEC SQL COMMIT WORK RELEASE ; */ 
 
 {
@@ -303,7 +303,7 @@ void DB_connect()
     printf("Oracle Connect SUCCESS by %s\n", uid.arr);
 }
 
-void Insert_tuple()
+void branchrequest()
 {
 /* EXEC SQL BEGIN DECLARE SECTION; */ 
 
