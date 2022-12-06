@@ -140,20 +140,20 @@ static const short sqlcud0[] =
 39,0,0,2,0,0,45,97,0,0,0,0,0,1,0,
 54,0,0,2,0,0,13,107,0,0,4,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
 85,0,0,2,0,0,15,122,0,0,0,0,0,1,0,
-100,0,0,2,0,0,17,191,0,0,1,1,0,1,0,1,97,0,0,
-119,0,0,2,0,0,45,195,0,0,0,0,0,1,0,
-134,0,0,2,0,0,13,199,0,0,1,0,0,1,0,2,9,0,0,
-153,0,0,2,0,0,15,210,0,0,0,0,0,1,0,
-168,0,0,3,0,0,24,231,0,0,1,1,0,1,0,1,97,0,0,
-187,0,0,4,0,0,29,233,0,0,0,0,0,1,0,
-202,0,0,5,0,0,24,260,0,0,1,1,0,1,0,1,97,0,0,
-221,0,0,6,0,0,29,262,0,0,0,0,0,1,0,
-236,0,0,2,0,0,17,275,0,0,1,1,0,1,0,1,97,0,0,
-255,0,0,2,0,0,45,281,0,0,0,0,0,1,0,
-270,0,0,2,0,0,13,286,0,0,1,0,0,1,0,2,9,0,0,
-289,0,0,2,0,0,17,303,0,0,1,1,0,1,0,1,97,0,0,
-308,0,0,2,0,0,45,309,0,0,0,0,0,1,0,
-323,0,0,2,0,0,13,314,0,0,1,0,0,1,0,2,9,0,0,
+100,0,0,2,0,0,17,192,0,0,1,1,0,1,0,1,97,0,0,
+119,0,0,2,0,0,45,196,0,0,0,0,0,1,0,
+134,0,0,2,0,0,13,200,0,0,2,0,0,1,0,2,9,0,0,2,9,0,0,
+157,0,0,2,0,0,15,221,0,0,0,0,0,1,0,
+172,0,0,3,0,0,24,241,0,0,1,1,0,1,0,1,97,0,0,
+191,0,0,4,0,0,29,243,0,0,0,0,0,1,0,
+206,0,0,5,0,0,24,270,0,0,1,1,0,1,0,1,97,0,0,
+225,0,0,6,0,0,29,272,0,0,0,0,0,1,0,
+240,0,0,2,0,0,17,285,0,0,1,1,0,1,0,1,97,0,0,
+259,0,0,2,0,0,45,291,0,0,0,0,0,1,0,
+274,0,0,2,0,0,13,296,0,0,1,0,0,1,0,2,9,0,0,
+293,0,0,2,0,0,17,313,0,0,1,1,0,1,0,1,97,0,0,
+312,0,0,2,0,0,45,319,0,0,0,0,0,1,0,
+327,0,0,2,0,0,13,324,0,0,1,0,0,1,0,2,9,0,0,
 };
 
 
@@ -515,6 +515,9 @@ void check_pid()
 	/* varchar check_pid[100]; */ 
 struct { unsigned short len; unsigned char arr[100]; } check_pid;
 
+	/* varchar check_pamount[100]; */ 
+struct { unsigned short len; unsigned char arr[100]; } check_pamount;
+
 
 	char dynstmt1[1000];
 	/* EXEC SQL END DECLARE SECTION; */ 
@@ -524,7 +527,7 @@ struct { unsigned short len; unsigned char arr[100]; } check_pid;
 	/* EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n"); */ 
 
 
-	sprintf(dynstmt1, "SELECT pid FROM businessstorage where pid = '%s' ", find_pid);
+	sprintf(dynstmt1, "SELECT pid, pamount FROM businessstorage where pid = '%s' ", find_pid);
 
 	/* EXEC SQL PREPARE S FROM : dynstmt1; */ 
 
@@ -593,7 +596,7 @@ struct { unsigned short len; unsigned char arr[100]; } check_pid;
 
 	for (;;)
 	{
-		/* EXEC SQL FETCH c_cursor6 INTO : check_pid; */ 
+		/* EXEC SQL FETCH c_cursor6 INTO : check_pid, check_pamount; */ 
 
 {
   struct sqlexd sqlstm;
@@ -619,6 +622,14 @@ struct { unsigned short len; unsigned char arr[100]; } check_pid;
   sqlstm.sqharm[0] = (unsigned int  )0;
   sqlstm.sqadto[0] = (unsigned short )0;
   sqlstm.sqtdso[0] = (unsigned short )0;
+  sqlstm.sqhstv[1] = (         void  *)&check_pamount;
+  sqlstm.sqhstl[1] = (unsigned int  )102;
+  sqlstm.sqhsts[1] = (         int  )0;
+  sqlstm.sqindv[1] = (         void  *)0;
+  sqlstm.sqinds[1] = (         int  )0;
+  sqlstm.sqharm[1] = (unsigned int  )0;
+  sqlstm.sqadto[1] = (unsigned short )0;
+  sqlstm.sqtdso[1] = (unsigned short )0;
   sqlstm.sqphsv = sqlstm.sqhstv;
   sqlstm.sqphsl = sqlstm.sqhstl;
   sqlstm.sqphss = sqlstm.sqhsts;
@@ -635,11 +646,21 @@ struct { unsigned short len; unsigned char arr[100]; } check_pid;
 
 		if (sqlca.sqlcode == 1403) break;
 		check_pid.arr[check_pid.len] = '\0';
-
+		check_pamount.arr[check_pamount.len] = '\0';
+		int i = atoi(check_pamount.arr)- atoi(find_pamount);
+		
 		if (check_pid.arr != NULL) {
-			return;
+			if(i<0){
+				gotoxy(40, 10);
+				printf("해당 물품의 수량이 부족합니다.");
+				Sleep(1500);
+				addStorage();
+			}
+			else{
+				return;
+			}
+			
 		}
-
 		break;
 	}
 	/* Close the cursor. */
@@ -652,7 +673,7 @@ struct { unsigned short len; unsigned char arr[100]; } check_pid;
  sqlstm.sqladtp = &sqladt;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )153;
+ sqlstm.offset = (unsigned int  )157;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -660,7 +681,6 @@ struct { unsigned short len; unsigned char arr[100]; } check_pid;
  sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
  if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
 }
-
 
 
 	gotoxy(40, 10);
@@ -695,7 +715,7 @@ void update_storage()
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )168;
+ sqlstm.offset = (unsigned int  )172;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -732,7 +752,7 @@ void update_storage()
  sqlstm.sqladtp = &sqladt;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )187;
+ sqlstm.offset = (unsigned int  )191;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -781,7 +801,7 @@ void update_businessStorage() { // 주문한 수량만큼 업체 재고에서 빼줌
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )202;
+ sqlstm.offset = (unsigned int  )206;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -818,7 +838,7 @@ void update_businessStorage() { // 주문한 수량만큼 업체 재고에서 빼줌
  sqlstm.sqladtp = &sqladt;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )221;
+ sqlstm.offset = (unsigned int  )225;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -854,7 +874,7 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )236;
+ sqlstm.offset = (unsigned int  )240;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -897,7 +917,7 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )255;
+ sqlstm.offset = (unsigned int  )259;
  sqlstm.selerr = (unsigned short)1;
  sqlstm.sqlpfmem = (unsigned int  )0;
  sqlstm.cud = sqlcud0;
@@ -923,7 +943,7 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
   sqlstm.sqladtp = &sqladt;
   sqlstm.sqltdsp = &sqltds;
   sqlstm.iters = (unsigned int  )1;
-  sqlstm.offset = (unsigned int  )270;
+  sqlstm.offset = (unsigned int  )274;
   sqlstm.selerr = (unsigned short)1;
   sqlstm.sqlpfmem = (unsigned int  )0;
   sqlstm.cud = sqlcud0;
@@ -984,7 +1004,7 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )289;
+ sqlstm.offset = (unsigned int  )293;
  sqlstm.cud = sqlcud0;
  sqlstm.sqlest = (unsigned char  *)&sqlca;
  sqlstm.sqlety = (unsigned short)4352;
@@ -1027,7 +1047,7 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
  sqlstm.sqltdsp = &sqltds;
  sqlstm.stmt = "";
  sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )308;
+ sqlstm.offset = (unsigned int  )312;
  sqlstm.selerr = (unsigned short)1;
  sqlstm.sqlpfmem = (unsigned int  )0;
  sqlstm.cud = sqlcud0;
@@ -1053,7 +1073,7 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
   sqlstm.sqladtp = &sqladt;
   sqlstm.sqltdsp = &sqltds;
   sqlstm.iters = (unsigned int  )1;
-  sqlstm.offset = (unsigned int  )323;
+  sqlstm.offset = (unsigned int  )327;
   sqlstm.selerr = (unsigned short)1;
   sqlstm.sqlpfmem = (unsigned int  )0;
   sqlstm.cud = sqlcud0;

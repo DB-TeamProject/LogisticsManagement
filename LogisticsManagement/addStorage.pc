@@ -179,6 +179,7 @@ void check_pid()
 {
 	EXEC SQL BEGIN DECLARE SECTION;
 	varchar check_pid[100];
+	varchar check_pamount[100];
 
 	char dynstmt1[1000];
 	EXEC SQL END DECLARE SECTION;
@@ -186,7 +187,7 @@ void check_pid()
 	/* Register sql_error() as the error handler. */
 	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
 
-	sprintf(dynstmt1, "SELECT pid FROM businessstorage where pid = '%s' ", find_pid);
+	sprintf(dynstmt1, "SELECT pid, pamount FROM businessstorage where pid = '%s' ", find_pid);
 
 	EXEC SQL PREPARE S FROM : dynstmt1;
 
@@ -196,19 +197,28 @@ void check_pid()
 
 	for (;;)
 	{
-		EXEC SQL FETCH c_cursor6 INTO : check_pid;
+		EXEC SQL FETCH c_cursor6 INTO : check_pid, check_pamount;
 		if (sqlca.sqlcode == 1403) break;
 		check_pid.arr[check_pid.len] = '\0';
-
+		check_pamount.arr[check_pamount.len] = '\0';
+		int i = atoi(check_pamount.arr)- atoi(find_pamount);
+		
 		if (check_pid.arr != NULL) {
-			return;
+			if(i<0){
+				gotoxy(40, 10);
+				printf("해당 물품의 수량이 부족합니다.");
+				Sleep(1500);
+				addStorage();
+			}
+			else{
+				return;
+			}
+			
 		}
-
 		break;
 	}
 	/* Close the cursor. */
 	EXEC SQL CLOSE c_cursor6;
-
 	gotoxy(40, 10);
 	printf("존재하지 않는 상품번호입니다.");
 	Sleep(1500);
