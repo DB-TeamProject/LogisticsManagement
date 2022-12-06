@@ -22,6 +22,7 @@
     <ClCompile Include="accountMgmt.c" />
     <ClCompile Include="addBranchAccount.c" />
     <ClCompile Include="addStorage.c" />
+    <ClCompile Include="Branchrequest.c" />
     <ClCompile Include="deleteBranchAccount.c" />
     <ClCompile Include="mainMenu.c" />
     <ClCompile Include="searchStorageStock.c" />

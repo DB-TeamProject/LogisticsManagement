@@ -30,6 +30,8 @@ void clrscr(void) ;
 
 int max=1;
 void getmax();
+void Branch();
+void branchrequest();
 void paintui();
 void paintui_errorpid();
 void paintui_erroramount();
@@ -38,8 +40,10 @@ char pid[5] ="";
 char amount[17] ="";
 char type[16] = "";
 void DB_connect();
-void Insert_tuple();
 void rtrim();
+
+extern void select_BranchMain();
+
 int count = 1;
 void sql_error();
 
@@ -49,39 +53,19 @@ EXEC SQL BEGIN DECLARE SECTION;
 EXEC SQL END DECLARE SECTION;
 
 
-void main()
+void Branch()
 {
-             
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 
-	DB_connect();
-	Insert_tuple();
-	EXEC SQL COMMIT WORK RELEASE ;
-	getch();
-}
-void DB_connect()
-{
-   /* 아이디와 패스워드 수정해서 넣으세요*/
-    strcpy((char *)uid.arr,"b20183109@//sedb.deu.ac.kr:1521/orcl");
-    uid.len = (short) strlen((char *)uid.arr);
-    strcpy((char *)pwd.arr,"20183109");
-    pwd.len = (short) strlen((char *)pwd.arr);
-
-    EXEC SQL CONNECT :uid IDENTIFIED BY :pwd;
-
-	// connection이 실패했을경우의 처리부분
-
-    if (sqlca.sqlcode != 0 && sqlca.sqlcode != -1405){ 
-		printf("\7Cconnect error: %s", sqlca.sqlerrm.sqlerrmc);
-		getch();
-		exit(-1);
-    }
-
-    printf("Oracle Connect SUCCESS by %s\n", uid.arr);
+    DB_connect();
+    branchrequest();
+    EXEC SQL COMMIT WORK RELEASE; 
+    getch();
 }
 
-void Insert_tuple()
+void branchrequest()
 {
+gotoxy(0, 1);
 EXEC SQL BEGIN DECLARE SECTION;
     varchar pamount[13];
     char dynstmt[1000];
@@ -98,7 +82,7 @@ EXEC SQL END DECLARE SECTION;
    /* 데이터 입력 */
 
     FILE* fs;
-    fs = fopen("request.txt", "r");
+    fs = fopen("Branchrequest.txt", "r");
     while (feof(fs) == 0) {
         char str[1000];
         fgets(str, 1000, fs);
@@ -120,12 +104,11 @@ EXEC SQL END DECLARE SECTION;
 
         for (;;)
         {
-            EXEC SQL WHENEVER NOT FOUND DO break;
             EXEC SQL FETCH c_cursor INTO : pamount;
+	if (sqlca.sqlcode == 1403) break;
             pamount.arr[pamount.len] = '\0';
         }
-        /* 전송된 투플의 수를 출력함. */
-        printf("match tuple no : %d\n", sqlca.sqlerrd[2]);
+
         if(sqlca.sqlerrd[2] == 0){
 	paintui_errorpid();
 	}
@@ -171,11 +154,9 @@ EXEC SQL END DECLARE SECTION;
     getmax();
     gotoxy(51, 16);
     sprintf(dynstmt,"insert into warehousing values ( '%d', '%s','104', '%s','%s',to_char(sysdate))" , max,type, pid, amount);
-    printf("stmt:%s\n", dynstmt);
     EXEC SQL EXECUTE IMMEDIATE :dynstmt ;
     EXEC SQL COMMIT WORK ;
-
-
+    select_BranchMain();
 }
 
 /* --------------------------------------------------------------------------
@@ -195,7 +176,7 @@ void getmax(){
         EXEC SQL DECLARE order_cursor CURSOR FOR S;
 
         /* cursor open */
-        EXEC SQL OPEN c_cursor;
+        EXEC SQL OPEN order_cursor;
 
         for (;;)
         {
@@ -203,8 +184,7 @@ void getmax(){
             EXEC SQL FETCH order_cursor INTO : ordernumber;
             ordernumber.arr[ordernumber.len] = '\0';
         }
-        /* 전송된 투플의 수를 출력함. */
-//        printf("match tuple no : %d\n", sqlca.sqlerrd[2]);
+
         if(sqlca.sqlerrd[2] == 0){
 	max=1;
 	}
@@ -217,7 +197,7 @@ void paintui() { //53 10 12 14
     gotoxy(0, 1);
     FILE* fs;
     count = 1;
-    fs = fopen("request.txt", "r");
+    fs = fopen("Branchrequest.txt", "r");
     while (feof(fs) == 0) {
         char str[1000];
         fgets(str, 1000, fs);
@@ -244,7 +224,7 @@ void paintui_errorpid() { //53 10 12 14
     gotoxy(0, 1);
     FILE* fs;
     count = 1;
-    fs = fopen("request.txt", "r");
+    fs = fopen("Branchrequest.txt", "r");
     while (feof(fs) == 0) {
         char str[1000];
         fgets(str, 1000, fs);
@@ -267,7 +247,7 @@ void paintui_erroramount() { //53 10 12 14
     gotoxy(0, 1);
     FILE* fs;
     count = 1;
-    fs = fopen("request.txt", "r");
+    fs = fopen("Branchrequest.txt", "r");
     while (feof(fs) == 0) {
         char str[1000];
         fgets(str, 1000, fs);
@@ -293,7 +273,7 @@ void paintui_errortype() { //53 10 12 14
     gotoxy(0, 1);
     FILE* fs;
     count = 1;
-    fs = fopen("request.txt", "r");
+    fs = fopen("Branchrequest.txt", "r");
     while (feof(fs) == 0) {
         char str[1000];
         fgets(str, 1000, fs);
@@ -318,49 +298,3 @@ void paintui_errortype() { //53 10 12 14
     }
 
 }
-void sql_error(char *msg)
-{
-    char err_msg[128];
-    size_t buf_len, msg_len;
-
-    EXEC SQL WHENEVER SQLERROR CONTINUE;
-
-    printf("\n%s\n", msg);
-    buf_len = sizeof (err_msg);
-    sqlglm(err_msg, &buf_len, &msg_len);
-    printf("%.*s\n", msg_len, err_msg);
-
-    getch();
-    EXEC SQL ROLLBACK WORK ;
-
-}
-
-/*---------------  화면 커서 제어 함수 --------------------*/
-#define STD_HANDLE GetStdHandle(STD_OUTPUT_HANDLE)
-
-void gotoxy(int x, int y)
-{
-    COORD Cur= {(SHORT)x, (SHORT) y};
-
-    SetConsoleCursorPosition(STD_HANDLE, Cur);
-}
-
-void getxy(int *x, int *y)
-{
-    CONSOLE_SCREEN_BUFFER_INFO Buf ;
-
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &Buf);
-    *x = (int)Buf.dwCursorPosition.X ;
-    *y = (int)Buf.dwCursorPosition.Y ;
- 
-}
-
-void clrscr(void)
-{
-    COORD Cur= {0, 0};
-    unsigned long dwLen;
-
-    FillConsoleOutputCharacter(STD_HANDLE, ' ', 80*25, Cur, &dwLen);
-}
-
-/*---------------------------------------------------------*/

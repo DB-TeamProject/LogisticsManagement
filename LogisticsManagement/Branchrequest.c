@@ -65,7 +65,7 @@ struct sqlcxp
 static const struct sqlcxp sqlfpn =
 {
     16,
-    "branchrequest.pc"
+    "Branchrequest.pc"
 };
 
 
@@ -103,16 +103,16 @@ static struct sqlexd {
    unsigned int   sqcmod;
    unsigned int   sqfmod;
    unsigned int   sqlpfmem;
-            void  *sqhstv[4];
-   unsigned int   sqhstl[4];
-            int   sqhsts[4];
-            void  *sqindv[4];
-            int   sqinds[4];
-   unsigned int   sqharm[4];
-   unsigned int   *sqharc[4];
-   unsigned short  sqadto[4];
-   unsigned short  sqtdso[4];
-} sqlstm = {13,4};
+            void  *sqhstv[1];
+   unsigned int   sqhstl[1];
+            int   sqhsts[1];
+            void  *sqindv[1];
+            int   sqinds[1];
+   unsigned int   sqharm[1];
+   unsigned int   *sqharc[1];
+   unsigned short  sqadto[1];
+   unsigned short  sqtdso[1];
+} sqlstm = {13,1};
 
 /* SQLLIB Prototypes */
 extern void sqlcxt (void **, unsigned int *,
@@ -135,19 +135,17 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,59,0,0,0,0,0,1,0,
-20,0,0,0,0,0,27,70,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
-51,0,0,3,0,0,17,114,0,0,1,1,0,1,0,1,97,0,0,
-70,0,0,3,0,0,45,119,0,0,0,0,0,1,0,
-85,0,0,3,0,0,13,124,0,0,1,0,0,1,0,2,9,0,0,
-104,0,0,3,0,0,15,133,0,0,0,0,0,1,0,
-119,0,0,4,0,0,24,175,0,0,1,1,0,1,0,1,97,0,0,
-138,0,0,5,0,0,29,176,0,0,0,0,0,1,0,
-153,0,0,3,0,0,17,193,0,0,1,1,0,1,0,1,97,0,0,
-172,0,0,3,0,0,45,198,0,0,0,0,0,1,0,
-187,0,0,3,0,0,13,203,0,0,1,0,0,1,0,2,9,0,0,
-206,0,0,3,0,0,15,213,0,0,0,0,0,1,0,
-221,0,0,6,0,0,31,334,0,0,0,0,0,1,0,
+5,0,0,1,0,0,30,62,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,98,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,103,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,107,0,0,1,0,0,1,0,2,9,0,0,
+73,0,0,2,0,0,15,116,0,0,0,0,0,1,0,
+88,0,0,3,0,0,24,157,0,0,1,1,0,1,0,1,97,0,0,
+107,0,0,4,0,0,29,158,0,0,0,0,0,1,0,
+122,0,0,2,0,0,17,174,0,0,1,1,0,1,0,1,97,0,0,
+141,0,0,2,0,0,45,179,0,0,0,0,0,1,0,
+156,0,0,2,0,0,13,184,0,0,1,0,0,1,0,2,9,0,0,
+175,0,0,2,0,0,15,193,0,0,0,0,0,1,0,
 };
 
 
@@ -183,6 +181,8 @@ void clrscr(void) ;
 
 int max=1;
 void getmax();
+void Branch();
+void branchrequest();
 void paintui();
 void paintui_errorpid();
 void paintui_erroramount();
@@ -191,8 +191,10 @@ char pid[5] ="";
 char amount[17] ="";
 char type[16] = "";
 void DB_connect();
-void Insert_tuple();
 void rtrim();
+
+extern void select_BranchMain();
+
 int count = 1;
 void sql_error();
 
@@ -208,103 +210,36 @@ struct { unsigned short len; unsigned char arr[20]; } pwd;
 
 
 
-void main()
+void Branch()
 {
-             
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
 
-	DB_connect();
-	branchrequest();
-	/* EXEC SQL COMMIT WORK RELEASE ; */ 
-
-{
- struct sqlexd sqlstm;
- sqlstm.sqlvsn = 13;
- sqlstm.arrsiz = 0;
- sqlstm.sqladtp = &sqladt;
- sqlstm.sqltdsp = &sqltds;
- sqlstm.iters = (unsigned int  )1;
- sqlstm.offset = (unsigned int  )5;
- sqlstm.cud = sqlcud0;
- sqlstm.sqlest = (unsigned char  *)&sqlca;
- sqlstm.sqlety = (unsigned short)4352;
- sqlstm.occurs = (unsigned int  )0;
- sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-}
-
-
-	getch();
-}
-void DB_connect()
-{
-   /* 아이디와 패스워드 수정해서 넣으세요*/
-    strcpy((char *)uid.arr,"b20183109@//sedb.deu.ac.kr:1521/orcl");
-    uid.len = (short) strlen((char *)uid.arr);
-    strcpy((char *)pwd.arr,"20183109");
-    pwd.len = (short) strlen((char *)pwd.arr);
-
-    /* EXEC SQL CONNECT :uid IDENTIFIED BY :pwd; */ 
+    DB_connect();
+    branchrequest();
+    /* EXEC SQL COMMIT WORK RELEASE; */ 
 
 {
     struct sqlexd sqlstm;
     sqlstm.sqlvsn = 13;
-    sqlstm.arrsiz = 4;
+    sqlstm.arrsiz = 0;
     sqlstm.sqladtp = &sqladt;
     sqlstm.sqltdsp = &sqltds;
-    sqlstm.iters = (unsigned int  )10;
-    sqlstm.offset = (unsigned int  )20;
+    sqlstm.iters = (unsigned int  )1;
+    sqlstm.offset = (unsigned int  )5;
     sqlstm.cud = sqlcud0;
     sqlstm.sqlest = (unsigned char  *)&sqlca;
     sqlstm.sqlety = (unsigned short)4352;
     sqlstm.occurs = (unsigned int  )0;
-    sqlstm.sqhstv[0] = (         void  *)&uid;
-    sqlstm.sqhstl[0] = (unsigned int  )82;
-    sqlstm.sqhsts[0] = (         int  )82;
-    sqlstm.sqindv[0] = (         void  *)0;
-    sqlstm.sqinds[0] = (         int  )0;
-    sqlstm.sqharm[0] = (unsigned int  )0;
-    sqlstm.sqadto[0] = (unsigned short )0;
-    sqlstm.sqtdso[0] = (unsigned short )0;
-    sqlstm.sqhstv[1] = (         void  *)&pwd;
-    sqlstm.sqhstl[1] = (unsigned int  )22;
-    sqlstm.sqhsts[1] = (         int  )22;
-    sqlstm.sqindv[1] = (         void  *)0;
-    sqlstm.sqinds[1] = (         int  )0;
-    sqlstm.sqharm[1] = (unsigned int  )0;
-    sqlstm.sqadto[1] = (unsigned short )0;
-    sqlstm.sqtdso[1] = (unsigned short )0;
-    sqlstm.sqphsv = sqlstm.sqhstv;
-    sqlstm.sqphsl = sqlstm.sqhstl;
-    sqlstm.sqphss = sqlstm.sqhsts;
-    sqlstm.sqpind = sqlstm.sqindv;
-    sqlstm.sqpins = sqlstm.sqinds;
-    sqlstm.sqparm = sqlstm.sqharm;
-    sqlstm.sqparc = sqlstm.sqharc;
-    sqlstm.sqpadto = sqlstm.sqadto;
-    sqlstm.sqptdso = sqlstm.sqtdso;
-    sqlstm.sqlcmax = (unsigned int )100;
-    sqlstm.sqlcmin = (unsigned int )2;
-    sqlstm.sqlcincr = (unsigned int )1;
-    sqlstm.sqlctimeout = (unsigned int )0;
-    sqlstm.sqlcnowait = (unsigned int )0;
     sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
 }
 
-
-
-	// connection이 실패했을경우의 처리부분
-
-    if (sqlca.sqlcode != 0 && sqlca.sqlcode != -1405){ 
-		printf("\7Cconnect error: %s", sqlca.sqlerrm.sqlerrmc);
-		getch();
-		exit(-1);
-    }
-
-    printf("Oracle Connect SUCCESS by %s\n", uid.arr);
+ 
+    getch();
 }
 
 void branchrequest()
 {
+gotoxy(0, 1);
 /* EXEC SQL BEGIN DECLARE SECTION; */ 
 
     /* varchar pamount[13]; */ 
@@ -344,12 +279,12 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
 {
         struct sqlexd sqlstm;
         sqlstm.sqlvsn = 13;
-        sqlstm.arrsiz = 4;
+        sqlstm.arrsiz = 1;
         sqlstm.sqladtp = &sqladt;
         sqlstm.sqltdsp = &sqltds;
         sqlstm.stmt = "";
         sqlstm.iters = (unsigned int  )1;
-        sqlstm.offset = (unsigned int  )51;
+        sqlstm.offset = (unsigned int  )20;
         sqlstm.cud = sqlcud0;
         sqlstm.sqlest = (unsigned char  *)&sqlca;
         sqlstm.sqlety = (unsigned short)4352;
@@ -386,12 +321,12 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
 {
         struct sqlexd sqlstm;
         sqlstm.sqlvsn = 13;
-        sqlstm.arrsiz = 4;
+        sqlstm.arrsiz = 1;
         sqlstm.sqladtp = &sqladt;
         sqlstm.sqltdsp = &sqltds;
         sqlstm.stmt = "";
         sqlstm.iters = (unsigned int  )1;
-        sqlstm.offset = (unsigned int  )70;
+        sqlstm.offset = (unsigned int  )39;
         sqlstm.selerr = (unsigned short)1;
         sqlstm.sqlpfmem = (unsigned int  )0;
         sqlstm.cud = sqlcud0;
@@ -407,18 +342,16 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
 
         for (;;)
         {
-            /* EXEC SQL WHENEVER NOT FOUND DO break; */ 
-
             /* EXEC SQL FETCH c_cursor INTO : pamount; */ 
 
 {
             struct sqlexd sqlstm;
             sqlstm.sqlvsn = 13;
-            sqlstm.arrsiz = 4;
+            sqlstm.arrsiz = 1;
             sqlstm.sqladtp = &sqladt;
             sqlstm.sqltdsp = &sqltds;
             sqlstm.iters = (unsigned int  )1;
-            sqlstm.offset = (unsigned int  )85;
+            sqlstm.offset = (unsigned int  )54;
             sqlstm.selerr = (unsigned short)1;
             sqlstm.sqlpfmem = (unsigned int  )0;
             sqlstm.cud = sqlcud0;
@@ -445,14 +378,14 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
             sqlstm.sqpadto = sqlstm.sqadto;
             sqlstm.sqptdso = sqlstm.sqtdso;
             sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-            if (sqlca.sqlcode == 1403) break;
             if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
 }
 
 
+	if (sqlca.sqlcode == 1403) break;
             pamount.arr[pamount.len] = '\0';
         }
-        /* 전송된 투플의 수를 출력함. */        
+
         if(sqlca.sqlerrd[2] == 0){
 	paintui_errorpid();
 	}
@@ -462,11 +395,11 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
 {
             struct sqlexd sqlstm;
             sqlstm.sqlvsn = 13;
-            sqlstm.arrsiz = 4;
+            sqlstm.arrsiz = 1;
             sqlstm.sqladtp = &sqladt;
             sqlstm.sqltdsp = &sqltds;
             sqlstm.iters = (unsigned int  )1;
-            sqlstm.offset = (unsigned int  )104;
+            sqlstm.offset = (unsigned int  )73;
             sqlstm.cud = sqlcud0;
             sqlstm.sqlest = (unsigned char  *)&sqlca;
             sqlstm.sqlety = (unsigned short)4352;
@@ -515,18 +448,18 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
     paintui();
     getmax();
     gotoxy(51, 16);
-    sprintf(dynstmt,"insert into warehousing values ( '%d', '%s','104', '%s','%s',to_char(sysdate))" , max,type, pid, amount);    
+    sprintf(dynstmt,"insert into warehousing values ( '%d', '%s','104', '%s','%s',to_char(sysdate))" , max,type, pid, amount);
     /* EXEC SQL EXECUTE IMMEDIATE :dynstmt ; */ 
 
 {
     struct sqlexd sqlstm;
     sqlstm.sqlvsn = 13;
-    sqlstm.arrsiz = 4;
+    sqlstm.arrsiz = 1;
     sqlstm.sqladtp = &sqladt;
     sqlstm.sqltdsp = &sqltds;
     sqlstm.stmt = "";
     sqlstm.iters = (unsigned int  )1;
-    sqlstm.offset = (unsigned int  )119;
+    sqlstm.offset = (unsigned int  )88;
     sqlstm.cud = sqlcud0;
     sqlstm.sqlest = (unsigned char  *)&sqlca;
     sqlstm.sqlety = (unsigned short)4352;
@@ -549,7 +482,6 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
     sqlstm.sqpadto = sqlstm.sqadto;
     sqlstm.sqptdso = sqlstm.sqtdso;
     sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-    //if (sqlca.sqlcode == 1403) break;
     if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
 }
 
@@ -559,11 +491,11 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
 {
     struct sqlexd sqlstm;
     sqlstm.sqlvsn = 13;
-    sqlstm.arrsiz = 4;
+    sqlstm.arrsiz = 1;
     sqlstm.sqladtp = &sqladt;
     sqlstm.sqltdsp = &sqltds;
     sqlstm.iters = (unsigned int  )1;
-    sqlstm.offset = (unsigned int  )138;
+    sqlstm.offset = (unsigned int  )107;
     sqlstm.cud = sqlcud0;
     sqlstm.sqlest = (unsigned char  *)&sqlca;
     sqlstm.sqlety = (unsigned short)4352;
@@ -573,8 +505,7 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
 }
 
 
-
-
+    select_BranchMain();
 }
 
 /* --------------------------------------------------------------------------
@@ -598,12 +529,12 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 {
         struct sqlexd sqlstm;
         sqlstm.sqlvsn = 13;
-        sqlstm.arrsiz = 4;
+        sqlstm.arrsiz = 1;
         sqlstm.sqladtp = &sqladt;
         sqlstm.sqltdsp = &sqltds;
         sqlstm.stmt = "";
         sqlstm.iters = (unsigned int  )1;
-        sqlstm.offset = (unsigned int  )153;
+        sqlstm.offset = (unsigned int  )122;
         sqlstm.cud = sqlcud0;
         sqlstm.sqlest = (unsigned char  *)&sqlca;
         sqlstm.sqlety = (unsigned short)4352;
@@ -635,17 +566,17 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 
 
         /* cursor open */
-        /* EXEC SQL OPEN c_cursor; */ 
+        /* EXEC SQL OPEN order_cursor; */ 
 
 {
         struct sqlexd sqlstm;
         sqlstm.sqlvsn = 13;
-        sqlstm.arrsiz = 4;
+        sqlstm.arrsiz = 1;
         sqlstm.sqladtp = &sqladt;
         sqlstm.sqltdsp = &sqltds;
         sqlstm.stmt = "";
         sqlstm.iters = (unsigned int  )1;
-        sqlstm.offset = (unsigned int  )172;
+        sqlstm.offset = (unsigned int  )141;
         sqlstm.selerr = (unsigned short)1;
         sqlstm.sqlpfmem = (unsigned int  )0;
         sqlstm.cud = sqlcud0;
@@ -668,11 +599,11 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 {
             struct sqlexd sqlstm;
             sqlstm.sqlvsn = 13;
-            sqlstm.arrsiz = 4;
+            sqlstm.arrsiz = 1;
             sqlstm.sqladtp = &sqladt;
             sqlstm.sqltdsp = &sqltds;
             sqlstm.iters = (unsigned int  )1;
-            sqlstm.offset = (unsigned int  )187;
+            sqlstm.offset = (unsigned int  )156;
             sqlstm.selerr = (unsigned short)1;
             sqlstm.sqlpfmem = (unsigned int  )0;
             sqlstm.cud = sqlcud0;
@@ -706,8 +637,7 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 
             ordernumber.arr[ordernumber.len] = '\0';
         }
-        /* 전송된 투플의 수를 출력함. */
-//        printf("match tuple no : %d\n", sqlca.sqlerrd[2]);
+
         if(sqlca.sqlerrd[2] == 0){
 	max=1;
 	}
@@ -718,11 +648,11 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 {
             struct sqlexd sqlstm;
             sqlstm.sqlvsn = 13;
-            sqlstm.arrsiz = 4;
+            sqlstm.arrsiz = 1;
             sqlstm.sqladtp = &sqladt;
             sqlstm.sqltdsp = &sqltds;
             sqlstm.iters = (unsigned int  )1;
-            sqlstm.offset = (unsigned int  )206;
+            sqlstm.offset = (unsigned int  )175;
             sqlstm.cud = sqlcud0;
             sqlstm.sqlest = (unsigned char  *)&sqlca;
             sqlstm.sqlety = (unsigned short)4352;
@@ -839,67 +769,3 @@ void paintui_errortype() { //53 10 12 14
     }
 
 }
-void sql_error(char *msg)
-{
-    char err_msg[128];
-    size_t buf_len, msg_len;
-
-    /* EXEC SQL WHENEVER SQLERROR CONTINUE; */ 
-
-
-    printf("\n%s\n", msg);
-    buf_len = sizeof (err_msg);
-    sqlglm(err_msg, &buf_len, &msg_len);
-    printf("%.*s\n", msg_len, err_msg);
-
-    getch();
-    /* EXEC SQL ROLLBACK WORK ; */ 
-
-{
-    struct sqlexd sqlstm;
-    sqlstm.sqlvsn = 13;
-    sqlstm.arrsiz = 4;
-    sqlstm.sqladtp = &sqladt;
-    sqlstm.sqltdsp = &sqltds;
-    sqlstm.iters = (unsigned int  )1;
-    sqlstm.offset = (unsigned int  )221;
-    sqlstm.cud = sqlcud0;
-    sqlstm.sqlest = (unsigned char  *)&sqlca;
-    sqlstm.sqlety = (unsigned short)4352;
-    sqlstm.occurs = (unsigned int  )0;
-    sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-}
-
-
-
-}
-
-/*---------------  화면 커서 제어 함수 --------------------*/
-#define STD_HANDLE GetStdHandle(STD_OUTPUT_HANDLE)
-
-void gotoxy(int x, int y)
-{
-    COORD Cur= {(SHORT)x, (SHORT) y};
-
-    SetConsoleCursorPosition(STD_HANDLE, Cur);
-}
-
-void getxy(int *x, int *y)
-{
-    CONSOLE_SCREEN_BUFFER_INFO Buf ;
-
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &Buf);
-    *x = (int)Buf.dwCursorPosition.X ;
-    *y = (int)Buf.dwCursorPosition.Y ;
- 
-}
-
-void clrscr(void)
-{
-    COORD Cur= {0, 0};
-    unsigned long dwLen;
-
-    FillConsoleOutputCharacter(STD_HANDLE, ' ', 80*25, Cur, &dwLen);
-}
-
-/*---------------------------------------------------------*/

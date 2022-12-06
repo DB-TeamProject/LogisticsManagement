@@ -134,9 +134,9 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
-{13,4130,840,0,0,
-5,0,0,1,0,0,30,57,0,0,0,0,0,1,0,
-20,0,0,0,0,0,27,67,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
+{13,4130,1,0,0,
+5,0,0,1,0,0,30,58,0,0,0,0,0,1,0,
+20,0,0,0,0,0,27,68,0,0,4,4,0,1,0,1,9,0,0,1,9,0,0,1,10,0,0,1,10,0,0,
 51,0,0,3,0,0,31,305,0,0,0,0,0,1,0,
 };
 
@@ -164,6 +164,7 @@ extern void searchStorageStock();
 extern void select_SearchProduct();
 extern void addBranchAccount();
 extern void deleteBranchAccount();
+extern void Branch();
 
 // win32 Visual C 2010 이상컴파일시 추가
 #define getch() _getch()
@@ -351,14 +352,14 @@ void select_BranchMain() {
 
 			if (input_status == 72) { // 방향키↑를 입력받았을 경우
 				if (cursor_position == 10) { // 커서가 첫번째 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
-					cursor_position = 18;
+					cursor_position = 16;
 				}
 				else {
 					cursor_position -= 2;
 				}
 			}
 			else if (input_status == 80) {// 방향키↓를 입력받았을 경우
-				if (cursor_position == 18) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
+				if (cursor_position == 16) { // 커서가 마지막 행에 있고, 윗방향키를 입력받았을 경우 마지막 행으로 감
 					cursor_position = 10;
 				}
 				else {
@@ -372,13 +373,12 @@ void select_BranchMain() {
 				select_SearchProduct();
 			}
 			else if (cursor_position == 12) {//두번째 행
+				Branch();
 			}
 			else if (cursor_position == 14) {//세번째 행
-			}
-			else if (cursor_position == 16) {//네번째 행
 				select_BranchAccount();
 			}
-			else if (cursor_position == 18) {//다섯번째 행
+			else if (cursor_position == 16) {//네번째 행
 				login();
 			}
 			break;
