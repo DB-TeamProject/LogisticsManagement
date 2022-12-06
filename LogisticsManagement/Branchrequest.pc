@@ -160,6 +160,9 @@ EXEC SQL END DECLARE SECTION;
     sprintf(dynstmt,"insert into warehousing values ( '%d', '%s','%s', '%s','%s',to_char(sysdate))" , max,type,global_officenumber, pid, amount);
     EXEC SQL EXECUTE IMMEDIATE :dynstmt ;
     EXEC SQL COMMIT WORK ;
+    gotoxy(38, 17);
+    printf("입/출고를 신청합니다.");
+    Sleep(1500);
     select_BranchMain();
 }
 
