@@ -1,0 +1,366 @@
+// 마지막고침 : 2020.11.17
+/*-----------------------------------------------
+dynstmt_insert_xy.pc
+화면의 특정 위치에서 사용자 입력을 받은 후 테이블에 
+insert 함
+-------------------------------------------------*/
+#define _CRT_SECURE_NO_WARNINGS
+
+//-----------------------------------------
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <conio.h>
+#include <stdbool.h>
+/* for oracle */
+#include <sqlda.h>
+#include <sqlca.h>
+#include <sqlcpr.h>
+
+//#ifdef WIN32
+#include < windows.h >
+/*---------------  화면 커서 위치 제어 ----------------------*/
+void gotoxy(int x, int y) ;
+void getxy(int *x, int *y) ;
+void clrscr(void) ;
+/*-----------------------------------------------------------*/
+#define getch() _getch()
+
+int max=1;
+void getmax();
+void paintui();
+void paintui_errorpid();
+void paintui_erroramount();
+void paintui_errortype();
+char pid[5] ="";
+char amount[17] ="";
+char type[16] = "";
+void DB_connect();
+void Insert_tuple();
+void rtrim();
+int count = 1;
+void sql_error();
+
+EXEC SQL BEGIN DECLARE SECTION;
+	VARCHAR uid[80];
+	VARCHAR pwd[20];
+EXEC SQL END DECLARE SECTION;
+
+
+void main()
+{
+             
+	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
+
+	DB_connect();
+	Insert_tuple();
+	EXEC SQL COMMIT WORK RELEASE ;
+	getch();
+}
+void DB_connect()
+{
+   /* 아이디와 패스워드 수정해서 넣으세요*/
+    strcpy((char *)uid.arr,"b20183109@//sedb.deu.ac.kr:1521/orcl");
+    uid.len = (short) strlen((char *)uid.arr);
+    strcpy((char *)pwd.arr,"20183109");
+    pwd.len = (short) strlen((char *)pwd.arr);
+
+    EXEC SQL CONNECT :uid IDENTIFIED BY :pwd;
+
+	// connection이 실패했을경우의 처리부분
+
+    if (sqlca.sqlcode != 0 && sqlca.sqlcode != -1405){ 
+		printf("\7Cconnect error: %s", sqlca.sqlerrm.sqlerrmc);
+		getch();
+		exit(-1);
+    }
+
+    printf("Oracle Connect SUCCESS by %s\n", uid.arr);
+}
+
+void Insert_tuple()
+{
+EXEC SQL BEGIN DECLARE SECTION;
+    varchar pamount[13];
+    char dynstmt[1000];
+
+EXEC SQL END DECLARE SECTION;
+
+    char ordernumber[100];   
+
+   /* Register sql_error() as the error handler. */
+    EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+   clrscr();
+
+   /* 데이터 입력 */
+
+    FILE* fs;
+    fs = fopen("request.txt", "r");
+    while (feof(fs) == 0) {
+        char str[1000];
+        fgets(str, 1000, fs);
+        printf("%s", str);
+    }
+
+
+   /* 제품번호 입력 */
+    do{
+        gotoxy(53, 10);
+        gets(pid);
+        sprintf(dynstmt, "SELECT pamount  FROM storage where pid =  '%s'", pid);
+        EXEC SQL PREPARE S FROM : dynstmt;
+        /* cursor 선언 */
+        EXEC SQL DECLARE c_cursor CURSOR FOR S;
+
+        /* cursor open */
+        EXEC SQL OPEN c_cursor;
+
+        for (;;)
+        {
+            EXEC SQL WHENEVER NOT FOUND DO break;
+            EXEC SQL FETCH c_cursor INTO : pamount;
+            pamount.arr[pamount.len] = '\0';
+        }
+        /* 전송된 투플의 수를 출력함. */
+        printf("match tuple no : %d\n", sqlca.sqlerrd[2]);
+        if(sqlca.sqlerrd[2] == 0){
+	paintui_errorpid();
+	}
+            /* Close the cursor. */
+            EXEC SQL CLOSE c_cursor;
+            }while (sqlca.sqlerrd[2] == 0);
+	if(count!=1) paintui();
+
+
+   /* 수량 입력 */
+    
+    bool isamount = false;
+    do {
+        isamount = false;
+        gotoxy(53, 12);
+        gets(amount);
+        for (int i = 0; amount[i] != '\0'; i++) //문자열 끝까지
+        {
+            if (!isdigit(amount[i])) { //숫자가 아니면
+                paintui_erroramount();
+                isamount = true;
+            }
+
+        }
+    } while (isamount);
+    paintui();
+    
+    bool istype = false;
+   /* 타입 입력 */
+    
+    
+    do {
+        gotoxy(53, 14);
+        gets(type);
+        istype = false;
+        if (strcmp("입고", type) != 0 && strcmp("출고", type) != 0)
+        {
+            paintui_errortype();
+            istype = true;
+        }
+    } while (istype);
+    paintui();
+    getmax();
+    gotoxy(51, 16);
+    sprintf(dynstmt,"insert into warehousing values ( '%d', '%s','104', '%s','%s',to_char(sysdate))" , max,type, pid, amount);
+    printf("stmt:%s\n", dynstmt);
+    EXEC SQL EXECUTE IMMEDIATE :dynstmt ;
+    EXEC SQL COMMIT WORK ;
+
+
+}
+
+/* --------------------------------------------------------------------------
+void sql_error()
+
+   errrpt prints the ORACLE error msg and number.
+-------------------------------------------------------------------------- */
+void getmax(){
+    EXEC SQL BEGIN DECLARE SECTION;
+    varchar ordernumber[13];
+    char dynstmt[1000];
+
+    EXEC SQL END DECLARE SECTION;
+    sprintf(dynstmt, "SELECT ordernumber FROM warehousing");
+        EXEC SQL PREPARE S FROM : dynstmt;
+        /* cursor 선언 */
+        EXEC SQL DECLARE order_cursor CURSOR FOR S;
+
+        /* cursor open */
+        EXEC SQL OPEN c_cursor;
+
+        for (;;)
+        {
+            EXEC SQL WHENEVER NOT FOUND DO break;
+            EXEC SQL FETCH order_cursor INTO : ordernumber;
+            ordernumber.arr[ordernumber.len] = '\0';
+        }
+        /* 전송된 투플의 수를 출력함. */
+//        printf("match tuple no : %d\n", sqlca.sqlerrd[2]);
+        if(sqlca.sqlerrd[2] == 0){
+	max=1;
+	}
+        else max = sqlca.sqlerrd[2];
+            /* Close the cursor. */
+            EXEC SQL CLOSE order_cursor;
+}
+void paintui() { //53 10 12 14
+    clrscr();
+    gotoxy(0, 1);
+    FILE* fs;
+    count = 1;
+    fs = fopen("request.txt", "r");
+    while (feof(fs) == 0) {
+        char str[1000];
+        fgets(str, 1000, fs);
+        printf("%s", str);
+        if (count == 10) {
+            gotoxy(53, 10);
+            printf("%s", pid);
+        }
+        if (count == 12) {
+            gotoxy(53, 12);
+            printf("%s", amount);
+        }
+        if (count == 14) {
+            gotoxy(53, 14);
+            printf("%s", type);
+        }
+        count++;
+    }
+
+}
+void paintui_errorpid() { //53 10 12 14
+    clrscr();
+    strcpy(pid," ");
+    gotoxy(0, 1);
+    FILE* fs;
+    count = 1;
+    fs = fopen("request.txt", "r");
+    while (feof(fs) == 0) {
+        char str[1000];
+        fgets(str, 1000, fs);
+        printf("%s", str);
+        if (count == 10) {
+            gotoxy(53, 10);
+            printf("%s", pid);            
+        }
+        if (count == 11) {
+            gotoxy(23, 11);
+            printf("확인할 수 없는 재품번호 입니다. 다시 입력해 주세요\n");
+        }
+        count++;
+    }   
+
+}
+void paintui_erroramount() { //53 10 12 14
+    clrscr();
+    strcpy(amount, " ");
+    gotoxy(0, 1);
+    FILE* fs;
+    count = 1;
+    fs = fopen("request.txt", "r");
+    while (feof(fs) == 0) {
+        char str[1000];
+        fgets(str, 1000, fs);
+        printf("%s", str);
+        if (count == 10) {
+            gotoxy(53, 10);
+            printf("%s", pid);
+        }
+        if (count == 12) {
+            gotoxy(53, 12);
+            printf("%s", amount);
+        }
+        if (count == 13) {
+            gotoxy(36, 13);
+            printf("숫자만 입력해 주세요.\n");
+        }
+        count++;
+    }
+}
+void paintui_errortype() { //53 10 12 14
+    clrscr();
+    strcpy(type, " ");
+    gotoxy(0, 1);
+    FILE* fs;
+    count = 1;
+    fs = fopen("request.txt", "r");
+    while (feof(fs) == 0) {
+        char str[1000];
+        fgets(str, 1000, fs);
+        printf("%s", str);
+        if (count == 10) {
+            gotoxy(53, 10);
+            printf("%s", pid);
+        }
+        if (count == 12) {
+            gotoxy(53, 12);
+            printf("%s", amount);
+        }
+        if (count == 14) {
+            gotoxy(53, 14);
+            printf("%s", type);
+        }
+        if (count == 15) {
+            gotoxy(33, 15);
+            printf("타입을 다시 입력해 주세요.\n");
+        }
+        count++;
+    }
+
+}
+void sql_error(char *msg)
+{
+    char err_msg[128];
+    size_t buf_len, msg_len;
+
+    EXEC SQL WHENEVER SQLERROR CONTINUE;
+
+    printf("\n%s\n", msg);
+    buf_len = sizeof (err_msg);
+    sqlglm(err_msg, &buf_len, &msg_len);
+    printf("%.*s\n", msg_len, err_msg);
+
+    getch();
+    EXEC SQL ROLLBACK WORK ;
+
+}
+
+/*---------------  화면 커서 제어 함수 --------------------*/
+#define STD_HANDLE GetStdHandle(STD_OUTPUT_HANDLE)
+
+void gotoxy(int x, int y)
+{
+    COORD Cur= {(SHORT)x, (SHORT) y};
+
+    SetConsoleCursorPosition(STD_HANDLE, Cur);
+}
+
+void getxy(int *x, int *y)
+{
+    CONSOLE_SCREEN_BUFFER_INFO Buf ;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &Buf);
+    *x = (int)Buf.dwCursorPosition.X ;
+    *y = (int)Buf.dwCursorPosition.Y ;
+ 
+}
+
+void clrscr(void)
+{
+    COORD Cur= {0, 0};
+    unsigned long dwLen;
+
+    FillConsoleOutputCharacter(STD_HANDLE, ' ', 80*25, Cur, &dwLen);
+}
+
+/*---------------------------------------------------------*/
