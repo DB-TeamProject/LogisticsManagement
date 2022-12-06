@@ -33,6 +33,7 @@ void getmax();
 void Branch();
 void branchrequest();
 void paintui();
+void get_item();
 void paintui_errorpid();
 void paintui_erroramount();
 void paintui_errortype();
@@ -45,6 +46,7 @@ void rtrim();
 extern void select_BranchMain();
 
 int count = 1;
+int colcount=0;
 void sql_error();
 
 EXEC SQL BEGIN DECLARE SECTION;
@@ -88,6 +90,7 @@ EXEC SQL END DECLARE SECTION;
         fgets(str, 1000, fs);
         printf("%s", str);
     }
+    get_item();
 
 
    /* 제품번호 입력 */
@@ -108,14 +111,15 @@ EXEC SQL END DECLARE SECTION;
 	if (sqlca.sqlcode == 1403) break;
             pamount.arr[pamount.len] = '\0';
         }
-
+        colcount= sqlca.sqlerrd[2];
         if(sqlca.sqlerrd[2] == 0){
 	paintui_errorpid();
 	}
             /* Close the cursor. */
             EXEC SQL CLOSE c_cursor;
-            }while (sqlca.sqlerrd[2] == 0);
+            }while (colcount== 0);
 	if(count!=1) paintui();
+	
 
 
    /* 수량 입력 */
@@ -216,7 +220,7 @@ void paintui() { //53 10 12 14
         }
         count++;
     }
-
+    get_item();
 }
 void paintui_errorpid() { //53 10 12 14
     clrscr();
@@ -238,7 +242,8 @@ void paintui_errorpid() { //53 10 12 14
             printf("확인할 수 없는 재품번호 입니다. 다시 입력해 주세요\n");
         }
         count++;
-    }   
+    }
+    get_item();   
 
 }
 void paintui_erroramount() { //53 10 12 14
@@ -266,6 +271,7 @@ void paintui_erroramount() { //53 10 12 14
         }
         count++;
     }
+    get_item();
 }
 void paintui_errortype() { //53 10 12 14
     clrscr();
@@ -296,5 +302,58 @@ void paintui_errortype() { //53 10 12 14
         }
         count++;
     }
+    get_item();
 
+}
+
+void get_item()
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	varchar id[100];
+	varchar name[100];
+	varchar amount[100];
+	varchar price[100];
+
+	char dynstmt[1000];
+	EXEC SQL END DECLARE SECTION;
+
+
+	/* Register sql_error() as the error handler. */
+	EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
+
+
+	/* 실행시킬 SQL 문장*/
+	sprintf(dynstmt, "SELECT b.pid, p.pname, b.pamount, p.pprice FROM storage b join productinfo p on b.pid = p.pid");
+
+	EXEC SQL PREPARE S FROM : dynstmt;
+
+	/* cursor 선언 */
+	EXEC SQL DECLARE p_cursor CURSOR FOR S;
+
+	/* cursor open */
+	EXEC SQL OPEN p_cursor;
+	gotoxy(20, 20);
+	printf(" 상품코드  |이름           |수량      |개당 가격    ");
+	gotoxy(20, 21);
+	printf("----------------------------------------------");
+	int y = 22;
+
+	for (;;)
+	{
+
+		EXEC SQL FETCH p_cursor INTO : id, : name, : amount, : price;
+		if (sqlca.sqlcode == 1403) break;
+		id.arr[id.len] = '\0';
+		name.arr[name.len] = '\0';
+		amount.arr[amount.len] = '\0';
+		price.arr[price.len] = '\0';
+		gotoxy(20, y);
+		printf(" %-10s|%-15s|%-10s|%-10s", id.arr, name.arr, amount.arr, price.arr);
+		y++;
+
+
+	}
+
+	/* Close the cursor. */
+	EXEC SQL CLOSE c_cursor;
 }
