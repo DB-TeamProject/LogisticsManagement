@@ -135,10 +135,10 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,46,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,93,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,99,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,104,0,0,3,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,
+5,0,0,1,0,0,30,48,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,95,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,101,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,106,0,0,3,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,
 };
 
 
@@ -164,6 +164,8 @@ static const short sqlcud0[] =
 
 extern void select_HeadMain();
 extern void select_BranchMain();
+char global_id[100];
+char global_officenumber[100];
 
 /*---------------  화면 커서 위치 제어 ----------------------*/
 #include < windows.h >
@@ -405,6 +407,8 @@ struct { unsigned short len; unsigned char arr[100]; } pw;
 					select_HeadMain();
 				}
 				else { //지사 계정으로 로그인
+					strcpy(global_id,id.arr);
+					strcpy(global_officenumber,officenumber.arr);
 					select_BranchMain();
 				}
 			}

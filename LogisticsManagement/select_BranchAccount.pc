@@ -21,7 +21,7 @@
 extern void select_BranchMain();
 extern void Mod_ID();
 extern void login();
-
+extern char global_officenumber[100];
 
 char officenum[100];
 char cur_id[100];
@@ -120,7 +120,7 @@ void select_ModId(){ //ID 변경 선택 함수
 					cursor_position = 18;
 				}
 				else {
-					cursor_position -= 1;
+					cursor_position = 7;
 				}
 			}
 			else if (input_status == 80) {// 방향키↓를 입력받았을 경우
@@ -128,7 +128,7 @@ void select_ModId(){ //ID 변경 선택 함수
 					cursor_position = 7;
 				}
 				else {
-					cursor_position += 1;
+					cursor_position = 18;
 				}
 			}
 		}
@@ -273,7 +273,9 @@ void Search_BranchInfo(){ // 지사 정보 조회 함수
 		
 		/* 사용자 입력 */
 		gotoxy(44, 7);
-		gets(no_temp1); //지사번호 입력
+		printf("%s",global_officenumber);
+		strcpy(no_temp1,global_officenumber);
+		//gets(no_temp1); //지사번호 입력
 		
 		
 		gotoxy(44, 9);

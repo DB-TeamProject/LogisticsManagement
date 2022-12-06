@@ -20,6 +20,8 @@
 
 extern void select_HeadMain();
 extern void select_BranchMain();
+char global_id[100];
+char global_officenumber[100];
 
 /*---------------  화면 커서 위치 제어 ----------------------*/
 #include < windows.h >
@@ -113,6 +115,8 @@ void select_login()
 					select_HeadMain();
 				}
 				else { //지사 계정으로 로그인
+					strcpy(global_id,id.arr);
+					strcpy(global_officenumber,officenumber.arr);
 					select_BranchMain();
 				}
 			}
