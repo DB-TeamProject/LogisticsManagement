@@ -199,7 +199,7 @@ void DB_connect();
 void rtrim();
 
 extern void select_BranchMain();
-
+extern char global_officenumber[100];
 int count = 1;
 int colcount=0;
 void sql_error();
@@ -456,7 +456,7 @@ struct { unsigned short len; unsigned char arr[13]; } pamount;
     paintui();
     getmax();
     gotoxy(51, 16);
-    sprintf(dynstmt,"insert into warehousing values ( '%d', '%s','104', '%s','%s',to_char(sysdate))" , max,type, pid, amount);
+    sprintf(dynstmt,"insert into warehousing values ( '%d', '%s','%s', '%s','%s',to_char(sysdate))" , max,type,global_officenumber, pid, amount);
     /* EXEC SQL EXECUTE IMMEDIATE :dynstmt ; */ 
 
 {
