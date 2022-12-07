@@ -145,11 +145,11 @@ static const short sqlcud0[] =
 122,0,0,2,0,0,17,182,0,0,1,1,0,1,0,1,97,0,0,
 141,0,0,2,0,0,45,187,0,0,0,0,0,1,0,
 156,0,0,2,0,0,13,192,0,0,1,0,0,1,0,2,9,0,0,
-175,0,0,2,0,0,15,200,0,0,0,0,0,1,0,
-190,0,0,2,0,0,17,331,0,0,1,1,0,1,0,1,97,0,0,
-209,0,0,2,0,0,45,337,0,0,0,0,0,1,0,
-224,0,0,2,0,0,13,347,0,0,4,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
-255,0,0,2,0,0,15,361,0,0,0,0,0,1,0,
+175,0,0,2,0,0,15,202,0,0,0,0,0,1,0,
+190,0,0,2,0,0,17,333,0,0,1,1,0,1,0,1,97,0,0,
+209,0,0,2,0,0,45,339,0,0,0,0,0,1,0,
+224,0,0,2,0,0,13,349,0,0,4,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+255,0,0,2,0,0,15,363,0,0,0,0,0,1,0,
 };
 
 
@@ -535,7 +535,7 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 
     /* EXEC SQL END DECLARE SECTION; */ 
 
-    sprintf(dynstmt, "SELECT max(ordernumber) FROM warehousing");
+    sprintf(dynstmt, "SELECT  max(CAST (ordernumber AS int)) FROM warehousing");
         /* EXEC SQL PREPARE S FROM : dynstmt; */ 
 
 {
@@ -649,9 +649,11 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 
             ordernumber.arr[ordernumber.len] = '\0';
         }
+	printf("max = %d",atoi(ordernumber.arr));
         if(sqlca.sqlerrd[2] == 0){
 	        max=1;
     	}
+	
         else max = atoi(ordernumber.arr)+1;
             /* Close the cursor. */
             /* EXEC SQL CLOSE order_cursor; */ 

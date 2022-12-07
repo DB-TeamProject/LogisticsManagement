@@ -178,7 +178,7 @@ void getmax(){
     char dynstmt[1000];
 
     EXEC SQL END DECLARE SECTION;
-    sprintf(dynstmt, "SELECT max(ordernumber) FROM warehousing");
+    sprintf(dynstmt, "SELECT  max(CAST (ordernumber AS int)) FROM warehousing");
         EXEC SQL PREPARE S FROM : dynstmt;
         /* cursor ¼±¾ð */
         EXEC SQL DECLARE order_cursor CURSOR FOR S;
@@ -192,9 +192,11 @@ void getmax(){
             EXEC SQL FETCH order_cursor INTO : ordernumber;
             ordernumber.arr[ordernumber.len] = '\0';
         }
+	printf("max = %d",atoi(ordernumber.arr));
         if(sqlca.sqlerrd[2] == 0){
 	        max=1;
     	}
+	
         else max = atoi(ordernumber.arr)+1;
             /* Close the cursor. */
             EXEC SQL CLOSE order_cursor;
