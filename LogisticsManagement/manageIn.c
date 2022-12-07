@@ -160,9 +160,9 @@ static const short sqlcud0[] =
 392,0,0,2,0,0,17,352,0,0,1,1,0,1,0,1,97,0,0,
 411,0,0,2,0,0,45,358,0,0,0,0,0,1,0,
 426,0,0,2,0,0,13,363,0,0,1,0,0,1,0,2,9,0,0,
-445,0,0,2,0,0,17,380,0,0,1,1,0,1,0,1,97,0,0,
-464,0,0,2,0,0,45,386,0,0,0,0,0,1,0,
-479,0,0,2,0,0,13,391,0,0,1,0,0,1,0,2,9,0,0,
+445,0,0,2,0,0,17,389,0,0,1,1,0,1,0,1,97,0,0,
+464,0,0,2,0,0,45,395,0,0,0,0,0,1,0,
+479,0,0,2,0,0,13,400,0,0,1,0,0,1,0,2,9,0,0,
 };
 
 
@@ -361,9 +361,9 @@ struct { unsigned short len; unsigned char arr[100]; } pdate;
 
 
 	gotoxy(20, 15);
-	printf("주문번호  |유형     |지점번호  |아이디   |주문량    |날짜    ");
+	printf("주문번호   |유형      |지점번호  |아이디    |주문량    |날짜    ");
 	gotoxy(20, 16);
-	printf("----------------------------------------------");
+	printf("-----------------------------------------------------------------");
 	int y = 17;
 
 	for (;;)
@@ -1325,9 +1325,18 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
 }
 
 
-
 		v_pamount.arr[v_pamount.len] = '\0';
-		strcpy(now_storagePamount, v_pamount.arr);
+		int i = atoi(v_pamount.arr)- atoi(order_amount);
+		if(i<0){
+			gotoxy(40, 8);
+			printf("해당 물품의 수량이 부족하여 수락할 수 없습니다.");
+			Sleep(1500);
+			manageIn();
+		}
+		else{
+			strcpy(now_storagePamount, v_pamount.arr);
+		}
+
 	}
 }
 
@@ -1455,8 +1464,16 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamount;
 }
 
 
-
 		v_pamount.arr[v_pamount.len] = '\0';
-		strcpy(now_branchStoragePamount, v_pamount.arr);
+		int i = atoi(v_pamount.arr)- atoi(order_amount);
+		if(i<0){
+			gotoxy(40, 8);
+			printf("해당 지사의 물품 수량이 부족하여 수락할 수 없습니다.");
+			Sleep(1500);
+			manageIn();
+		}
+		else{
+			strcpy(now_branchStoragePamount, v_pamount.arr);
+		}
 	}
 }

@@ -96,9 +96,9 @@ void get_InTuple()
 	/* cursor open */
 	EXEC SQL OPEN c_cursor;
 	gotoxy(20, 15);
-	printf("주문번호  |유형     |지점번호  |아이디   |주문량    |날짜    ");
+	printf("주문번호   |유형      |지점번호  |아이디    |주문량    |날짜    ");
 	gotoxy(20, 16);
-	printf("----------------------------------------------");
+	printf("-----------------------------------------------------------------");
 	int y = 17;
 
 	for (;;)
@@ -361,9 +361,18 @@ void select_nStoragePamount() {
 	{
 		if (sqlca.sqlcode == 1403) break;
 		EXEC SQL FETCH c_cursor9 INTO : v_pamount;
-
 		v_pamount.arr[v_pamount.len] = '\0';
-		strcpy(now_storagePamount, v_pamount.arr);
+		int i = atoi(v_pamount.arr)- atoi(order_amount);
+		if(i<0){
+			gotoxy(40, 8);
+			printf("해당 물품의 수량이 부족하여 수락할 수 없습니다.");
+			Sleep(1500);
+			manageIn();
+		}
+		else{
+			strcpy(now_storagePamount, v_pamount.arr);
+		}
+
 	}
 }
 
@@ -389,8 +398,16 @@ void select_nBranchStoragePamount() {
 	{
 		if (sqlca.sqlcode == 1403) break;
 		EXEC SQL FETCH c_cursor10 INTO : v_pamount;
-
 		v_pamount.arr[v_pamount.len] = '\0';
-		strcpy(now_branchStoragePamount, v_pamount.arr);
+		int i = atoi(v_pamount.arr)- atoi(order_amount);
+		if(i<0){
+			gotoxy(40, 8);
+			printf("해당 지사의 물품 수량이 부족하여 수락할 수 없습니다.");
+			Sleep(1500);
+			manageIn();
+		}
+		else{
+			strcpy(now_branchStoragePamount, v_pamount.arr);
+		}
 	}
 }
