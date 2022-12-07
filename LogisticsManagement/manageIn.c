@@ -292,7 +292,7 @@ struct { unsigned short len; unsigned char arr[100]; } pdate;
 
 
 	/* 실행시킬 SQL 문장*/
-	sprintf(dynstmt, "SELECT ordernumber, type, officenumber, pid, orderamount, pdate FROM warehousing WHERE type = '출고' ORDER BY ordernumber ASC");
+	sprintf(dynstmt, "SELECT ordernumber, type, officenumber, pid, orderamount, pdate FROM warehousing WHERE type = '출고' ORDER BY CAST(ordernumber AS int) ASC");
 
 	/* EXEC SQL PREPARE S FROM : dynstmt; */ 
 

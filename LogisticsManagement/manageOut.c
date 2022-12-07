@@ -291,7 +291,7 @@ struct { unsigned short len; unsigned char arr[100]; } pdate;
 
 
 	/* 실행시킬 SQL 문장*/
-	sprintf(dynstmt, "SELECT ordernumber, type, officenumber, pid, orderamount, pdate FROM warehousing WHERE type = '입고' ORDER BY ordernumber ASC");
+	sprintf(dynstmt, "SELECT ordernumber, type, officenumber, pid, orderamount, pdate FROM warehousing WHERE type = '입고' ORDER BY CAST(ordernumber AS int) ASC");
 
 	/* EXEC SQL PREPARE S FROM : dynstmt; */ 
 
@@ -811,7 +811,7 @@ void no_receiv()
 
 
 	gotoxy(38, 8);
-	printf("해당 주문번호의 입고는 거절되었습니다.");
+	printf("완료되었습니다.");
 	Sleep(1500);
 	manageOut();
 }
