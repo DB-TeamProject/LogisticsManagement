@@ -241,7 +241,7 @@ void no_receiv()
 	EXEC SQL COMMIT WORK;
 
 	gotoxy(38, 8);
-	printf("해당 주문번호의 입고는 거절되었습니다.");
+	printf("완료되었습니다.");
 	Sleep(1500);
 	manageOut();
 }
