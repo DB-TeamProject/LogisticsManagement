@@ -519,7 +519,7 @@ void receive_number() {
 			}
 			else if (input_status == 13) { // 엔터키를 입력받았을 경우
 				if (cursor_position == 9) {//첫번째 행
-					check_ordernu;
+					check_ordernu();
 					checking_pi();
 					select_nBranchStoragePamoun();
 					select_nStoragePamoun();
@@ -1459,15 +1459,7 @@ struct { unsigned short len; unsigned char arr[100]; } v_pamoun;
 
 
 		v_pamoun.arr[v_pamoun.len] = '\0';
-		int i = atoi(v_pamoun.arr)- atoi(order_amoun);
-		if(i<0){
-			gotoxy(40, 8);
-			printf("해당 지사의 물품 수량이 부족하여 수락할 수 없습니다.");
-			Sleep(1500);
-			manageOut();
-		}
-		else{
 			strcpy(now_branchStoragePamoun, v_pamoun.arr);
-		}
+		
 	}
 }
