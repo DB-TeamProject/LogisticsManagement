@@ -1,8 +1,6 @@
-// 마지막고침 : 2020.11.17
+// 최초 작성자 : 20183207 김성찬
 /*-----------------------------------------------
-dynstmt_insert_xy.pc
-화면의 특정 위치에서 사용자 입력을 받은 후 테이블에 
-insert 함
+
 -------------------------------------------------*/
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -37,9 +35,10 @@ void get_item();
 void paintui_errorpid();
 void paintui_erroramount();
 void paintui_errortype();
-char pid[5] ="";
-char amount[17] ="";
-char type[16] = "";
+char pid[15] ="";
+char amount[15] ="";
+char type[15] = "";
+char tmp[25]="";
 void DB_connect();
 void rtrim();
 
@@ -58,7 +57,9 @@ EXEC SQL END DECLARE SECTION;
 void Branch()
 {
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
-
+    strcpy(pid,tmp);
+    strcpy(amount,tmp);
+    strcpy(type,tmp);
     DB_connect();
     branchrequest();
     EXEC SQL COMMIT WORK RELEASE; 
@@ -177,7 +178,7 @@ void getmax(){
     char dynstmt[1000];
 
     EXEC SQL END DECLARE SECTION;
-    sprintf(dynstmt, "SELECT ordernumber FROM warehousing");
+    sprintf(dynstmt, "SELECT max(ordernumber) FROM warehousing");
         EXEC SQL PREPARE S FROM : dynstmt;
         /* cursor 선언 */
         EXEC SQL DECLARE order_cursor CURSOR FOR S;
@@ -191,11 +192,10 @@ void getmax(){
             EXEC SQL FETCH order_cursor INTO : ordernumber;
             ordernumber.arr[ordernumber.len] = '\0';
         }
-
         if(sqlca.sqlerrd[2] == 0){
-	max=1;
-	}
-        else max = sqlca.sqlerrd[2];
+	        max=1;
+    	}
+        else max = atoi(ordernumber.arr)+1;
             /* Close the cursor. */
             EXEC SQL CLOSE order_cursor;
 }

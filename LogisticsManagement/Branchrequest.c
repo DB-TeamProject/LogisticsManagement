@@ -135,16 +135,16 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
 {13,4130,1,0,0,
-5,0,0,1,0,0,30,64,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,101,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,106,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,110,0,0,1,0,0,1,0,2,9,0,0,
-73,0,0,2,0,0,15,119,0,0,0,0,0,1,0,
-88,0,0,3,0,0,24,161,0,0,1,1,0,1,0,1,97,0,0,
-107,0,0,4,0,0,29,162,0,0,0,0,0,1,0,
-122,0,0,2,0,0,17,181,0,0,1,1,0,1,0,1,97,0,0,
-141,0,0,2,0,0,45,186,0,0,0,0,0,1,0,
-156,0,0,2,0,0,13,191,0,0,1,0,0,1,0,2,9,0,0,
+5,0,0,1,0,0,30,65,0,0,0,0,0,1,0,
+20,0,0,2,0,0,17,102,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,107,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,111,0,0,1,0,0,1,0,2,9,0,0,
+73,0,0,2,0,0,15,120,0,0,0,0,0,1,0,
+88,0,0,3,0,0,24,162,0,0,1,1,0,1,0,1,97,0,0,
+107,0,0,4,0,0,29,163,0,0,0,0,0,1,0,
+122,0,0,2,0,0,17,182,0,0,1,1,0,1,0,1,97,0,0,
+141,0,0,2,0,0,45,187,0,0,0,0,0,1,0,
+156,0,0,2,0,0,13,192,0,0,1,0,0,1,0,2,9,0,0,
 175,0,0,2,0,0,15,200,0,0,0,0,0,1,0,
 190,0,0,2,0,0,17,331,0,0,1,1,0,1,0,1,97,0,0,
 209,0,0,2,0,0,45,337,0,0,0,0,0,1,0,
@@ -153,11 +153,9 @@ static const short sqlcud0[] =
 };
 
 
-// 마지막고침 : 2020.11.17
+// 최초 작성자 : 20183207 김성찬
 /*-----------------------------------------------
-dynstmt_insert_xy.pc
-화면의 특정 위치에서 사용자 입력을 받은 후 테이블에 
-insert 함
+
 -------------------------------------------------*/
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -192,9 +190,10 @@ void get_item();
 void paintui_errorpid();
 void paintui_erroramount();
 void paintui_errortype();
-char pid[5] ="";
-char amount[17] ="";
-char type[16] = "";
+char pid[15] ="";
+char amount[15] ="";
+char type[15] = "";
+char tmp[25]="";
 void DB_connect();
 void rtrim();
 
@@ -219,7 +218,9 @@ struct { unsigned short len; unsigned char arr[20]; } pwd;
 void Branch()
 {
 	_putenv("NLS_LANG=American_America.KO16KSC5601"); //한글사용
-
+    strcpy(pid,tmp);
+    strcpy(amount,tmp);
+    strcpy(type,tmp);
     DB_connect();
     branchrequest();
     /* EXEC SQL COMMIT WORK RELEASE; */ 
@@ -534,7 +535,7 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 
     /* EXEC SQL END DECLARE SECTION; */ 
 
-    sprintf(dynstmt, "SELECT ordernumber FROM warehousing");
+    sprintf(dynstmt, "SELECT max(ordernumber) FROM warehousing");
         /* EXEC SQL PREPARE S FROM : dynstmt; */ 
 
 {
@@ -648,11 +649,10 @@ struct { unsigned short len; unsigned char arr[13]; } ordernumber;
 
             ordernumber.arr[ordernumber.len] = '\0';
         }
-
         if(sqlca.sqlerrd[2] == 0){
-	max=1;
-	}
-        else max = sqlca.sqlerrd[2];
+	        max=1;
+    	}
+        else max = atoi(ordernumber.arr)+1;
             /* Close the cursor. */
             /* EXEC SQL CLOSE order_cursor; */ 
 
