@@ -192,7 +192,6 @@ void getmax(){
             EXEC SQL FETCH order_cursor INTO : ordernumber;
             ordernumber.arr[ordernumber.len] = '\0';
         }
-	printf("max = %d",atoi(ordernumber.arr));
         if(sqlca.sqlerrd[2] == 0){
 	        max=1;
     	}
