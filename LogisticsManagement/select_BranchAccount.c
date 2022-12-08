@@ -240,7 +240,7 @@ void BranchAccount(){
 	int cursor_position = 14; // 현재 커서 위치
 	int input_status; // 입력 상태
 	while (1) {
-		gotoxy(53, cursor_position);
+		gotoxy(42, cursor_position);
 		input_status = _getch();
 		if (input_status == 72 || input_status == 80) { //윗방향 또는 아래방향을 입력받았을 경우
 

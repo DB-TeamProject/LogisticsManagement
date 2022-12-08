@@ -361,7 +361,7 @@ struct { unsigned short len; unsigned char arr[100]; } pdate;
 
 
 	gotoxy(20, 15);
-	printf("주문번호   |유형      |지점번호  |아이디    |주문량    |날짜    ");
+	printf("주문번호   |유형      |지점번호  |상품번호    |주문량    |날짜    ");
 	gotoxy(20, 16);
 	printf("-----------------------------------------------------------------");
 	int y = 17;

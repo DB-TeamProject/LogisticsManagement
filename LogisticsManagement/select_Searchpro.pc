@@ -22,7 +22,7 @@ extern void gotoxy(int x, int y);
 extern void getxy(int* x, int* y);
 extern void clrscr(void);
 /*-----------------------------------------------------------*/
-
+extern char global_officenumber[100];
 extern void select_BranchMain();
 void select_SearchProduct();
 void select_ProMenu();
@@ -53,7 +53,7 @@ void select_ProMenu(){
 	int cursor_position = 10;
 	int input_status;
 	while(1){
-		gotoxy(60, cursor_position);
+		gotoxy(42, cursor_position);
 		input_status = _getch();
 
 		if(input_status == 72 || input_status == 80){
@@ -114,18 +114,11 @@ void select_allproduct(){
 		char dynstmt[1000];
 		EXEC SQL END DECLARE SECTION;
 	
-		char office[100];
-		char	pass[100];
 
 		EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n");
 
-		gotoxy(49,6);
-		gets(office);
 
-		gotoxy(49,7);
-		gets(pass);
-
-		sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamount, p.pprice from 	(branchstorage b join productinfo p  on p.pid = b.pid ) join account a on b.officenumber = 	a.officenumber and a.pw = '%s'and a.officenumber = '%s'", pass, office);
+		sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamount, p.pprice from branchstorage b join productinfo p  on p.pid = b.pid WHERE b.officenumber = '%s'", global_officenumber);
 	
 		EXEC SQL PREPARE S FROM :dynstmt;
 
@@ -161,7 +154,6 @@ void select_allproduct(){
 				if (input_status == 13){
 					select_ProMenu();
 				}
-				break;
 			}
 		
 		}

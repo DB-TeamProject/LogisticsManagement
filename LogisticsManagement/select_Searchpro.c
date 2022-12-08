@@ -134,15 +134,15 @@ typedef struct { unsigned short len; unsigned char arr[1]; } varchar;
 
 /* cud (compilation unit data) array */
 static const short sqlcud0[] =
-{13,4130,840,0,0,
+{13,4130,1,0,0,
 5,0,0,1,0,0,30,45,0,0,0,0,0,1,0,
-20,0,0,2,0,0,17,130,0,0,1,1,0,1,0,1,97,0,0,
-39,0,0,2,0,0,45,134,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,147,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
-89,0,0,2,0,0,15,169,0,0,0,0,0,1,0,
-104,0,0,2,0,0,17,214,0,0,1,1,0,1,0,1,97,0,0,
-123,0,0,2,0,0,45,218,0,0,0,0,0,1,0,
-138,0,0,2,0,0,13,231,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+20,0,0,2,0,0,17,123,0,0,1,1,0,1,0,1,97,0,0,
+39,0,0,2,0,0,45,127,0,0,0,0,0,1,0,
+54,0,0,2,0,0,13,140,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+89,0,0,2,0,0,15,161,0,0,0,0,0,1,0,
+104,0,0,2,0,0,17,206,0,0,1,1,0,1,0,1,97,0,0,
+123,0,0,2,0,0,45,210,0,0,0,0,0,1,0,
+138,0,0,2,0,0,13,223,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
 };
 
 
@@ -170,7 +170,7 @@ extern void gotoxy(int x, int y);
 extern void getxy(int* x, int* y);
 extern void clrscr(void);
 /*-----------------------------------------------------------*/
-
+extern char global_officenumber[100];
 extern void select_BranchMain();
 void select_SearchProduct();
 void select_ProMenu();
@@ -224,7 +224,7 @@ void select_ProMenu(){
 	int cursor_position = 10;
 	int input_status;
 	while(1){
-		gotoxy(60, cursor_position);
+		gotoxy(42, cursor_position);
 		input_status = _getch();
 
 		if(input_status == 72 || input_status == 80){
@@ -297,19 +297,12 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 		/* EXEC SQL END DECLARE SECTION; */ 
 
 	
-		char office[100];
-		char	pass[100];
 
 		/* EXEC SQL WHENEVER SQLERROR DO sql_error("\7ORACLE ERROR:\n"); */ 
 
 
-		gotoxy(49,6);
-		gets(office);
 
-		gotoxy(49,7);
-		gets(pass);
-
-		sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamount, p.pprice from 	(branchstorage b join productinfo p  on p.pid = b.pid ) join account a on b.officenumber = 	a.officenumber and a.pw = '%s'and a.officenumber = '%s'", pass, office);
+		sprintf(dynstmt, "SELECT b.officenumber, b.pid, p.pname, b.pamount, p.pprice from branchstorage b join productinfo p  on p.pid = b.pid WHERE b.officenumber = '%s'", global_officenumber);
 	
 		/* EXEC SQL PREPARE S FROM :dynstmt; */ 
 
@@ -477,7 +470,6 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 				if (input_status == 13){
 					select_ProMenu();
 				}
-				break;
 			}
 		
 		}
