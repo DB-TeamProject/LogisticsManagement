@@ -565,7 +565,7 @@ void clrscr(void)
 	COORD Cur = { 0, 0 };
 	unsigned long dwLen;
 
-	FillConsoleOutputCharacter(STD_HANDLE, ' ', 120 * 40, Cur, &dwLen);
+	FillConsoleOutputCharacter(STD_HANDLE, ' ', 100 * 40, Cur, &dwLen);
 }
 
 /*---------------------------------------------------------*/
