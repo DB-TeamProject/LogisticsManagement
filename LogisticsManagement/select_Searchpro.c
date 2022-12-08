@@ -138,11 +138,11 @@ static const short sqlcud0[] =
 5,0,0,1,0,0,30,45,0,0,0,0,0,1,0,
 20,0,0,2,0,0,17,123,0,0,1,1,0,1,0,1,97,0,0,
 39,0,0,2,0,0,45,127,0,0,0,0,0,1,0,
-54,0,0,2,0,0,13,140,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
-89,0,0,2,0,0,15,161,0,0,0,0,0,1,0,
-104,0,0,2,0,0,17,206,0,0,1,1,0,1,0,1,97,0,0,
-123,0,0,2,0,0,45,210,0,0,0,0,0,1,0,
-138,0,0,2,0,0,13,223,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+54,0,0,2,0,0,13,139,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
+89,0,0,2,0,0,15,158,0,0,0,0,0,1,0,
+104,0,0,2,0,0,17,204,0,0,1,1,0,1,0,1,97,0,0,
+123,0,0,2,0,0,45,208,0,0,0,0,0,1,0,
+138,0,0,2,0,0,13,221,0,0,5,0,0,1,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,2,9,0,0,
 };
 
 
@@ -375,8 +375,6 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 		printf("-----------------------------------------------------------");
 		int y = 11;
 	
-		/* EXEC SQL WHENEVER NOT FOUND DO break; */ 
-
 
 	
 
@@ -449,30 +447,27 @@ struct { unsigned short len; unsigned char arr[100]; } price;
    sqlstm.sqpadto = sqlstm.sqadto;
    sqlstm.sqptdso = sqlstm.sqtdso;
    sqlcxt((void **)0, &sqlctx, &sqlstm, &sqlfpn);
-   if (sqlca.sqlcode == 1403) break;
    if (sqlca.sqlcode < 0) sql_error("\7ORACLE ERROR:\n");
 }
 
 
-
+			if (sqlca.sqlcode == 1403) break;
 			officenumber.arr[officenumber.len] = '\0';
 			id.arr[id.len] = '\0';
 			name.arr[name.len] = '\0';
 			amount.arr[amount.len] = '\0';
 			price.arr[price.len] = '\0';
-			if (officenumber.arr != NULL) {
-				gotoxy(20, y);
-				printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, 	amount.arr, price.arr);
-				y++;
-				count = 0;
-				gotoxy(55,25);
-				int input_status = _getch();
-				if (input_status == 13){
-					select_ProMenu();
-				}
-			}
-		
+			gotoxy(20, y);
+			printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, 	amount.arr, price.arr);
+			y++;
+			count = 0;
 		}
+		int input_status = _getch();
+		if (input_status == 13){
+		select_ProMenu();
+		break;
+		}
+		
 	}
 	/* EXEC SQL CLOSE c_cursor; */ 
 
@@ -493,6 +488,7 @@ struct { unsigned short len; unsigned char arr[100]; } price;
 }
 
 
+	
 }
 	
 	

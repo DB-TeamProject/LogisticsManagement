@@ -132,33 +132,31 @@ void select_allproduct(){
 		printf("-----------------------------------------------------------");
 		int y = 11;
 	
-		EXEC SQL WHENEVER NOT FOUND DO break;
 
 	
 
 		for (;;){
 			EXEC SQL FETCH c_cursor INTO :officenumber, :id, :name, :amount, :price;
-
+			if (sqlca.sqlcode == 1403) break;
 			officenumber.arr[officenumber.len] = '\0';
 			id.arr[id.len] = '\0';
 			name.arr[name.len] = '\0';
 			amount.arr[amount.len] = '\0';
 			price.arr[price.len] = '\0';
-			if (officenumber.arr != NULL) {
-				gotoxy(20, y);
-				printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, 	amount.arr, price.arr);
-				y++;
-				count = 0;
-				gotoxy(55,25);
-				int input_status = _getch();
-				if (input_status == 13){
-					select_ProMenu();
-				}
-			}
-		
+			gotoxy(20, y);
+			printf("%-10s|%-10s|%-15s|%-10s|%-10s", officenumber.arr, id.arr, name.arr, 	amount.arr, price.arr);
+			y++;
+			count = 0;
 		}
+		int input_status = _getch();
+		if (input_status == 13){
+		select_ProMenu();
+		break;
+		}
+		
 	}
 	EXEC SQL CLOSE c_cursor;
+	
 }
 	
 	
